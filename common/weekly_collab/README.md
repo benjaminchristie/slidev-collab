@@ -41,11 +41,68 @@ under `common/`; the formal-talk theme is `./common/collab`.
 <Aside>Should we put the demo collection on hold?</Aside>
 <Aside kind="decision">Submitting to ICRA, not RSS.</Aside>
 <Aside kind="risk">ARC queue times could eat the whole week.</Aside>
+
+<div class="wc-metrics">
+  <Metric value="47%" label="success rate" delta="+16" />
+  <Metric value="3.2 h" label="median run" delta="-0.8" good="down" />
+</div>
+
+<Legend :items="[['blue', 'ours'], ['muted', 'baseline']]" />
+<Legend shape="dot" :items="[['orange', 'ablation']]" />
+
+<Next by="Mon">Rerun seeds 4-8 on the new reward</Next>
+<Next by="Thu" who="Alex">Decide whether demo collection continues</Next>
+
+<LastWeek by="Mon" state="done">Rerun seeds 4-8</LastWeek>
+<LastWeek by="Thu" state="missed" who="Alex">Decide on demo collection</LastWeek>
+
+<Blocker since="6 days" who="Priya">Eval cluster queue times</Blocker>
+
+<div>
+<Runs :rows="[
+  ['reward-v3', '8/8', 'done'],
+  ['reward-v4', '3/8', 'wip'],
+]" />
+</div>
 ```
+
+A component tag written across several lines is not a complete tag on its own
+line, so markdown escapes it rather than handing it to Vue. Wrap those in a
+plain `<div>`, as above. Anything that fits on one line needs no wrapper.
 
 `<Aside>` is for the thing you actually want a reaction to. Making it a callout
 rather than one more bullet is the difference between it getting discussed and
 it getting skipped.
+
+`<Metric>` is the same argument applied to a number. `good="down"` says which
+direction counts as good news — a runtime wants to fall, a success rate wants to
+rise — and the colour of the delta follows from that rather than from its sign.
+A run of them goes in a `<div class="wc-metrics">`, which keeps them on one
+line; a single metric can sit inside a bullet on its own.
+
+`<Legend>` names the series in a figure at the deck's own type size, which is
+both cheaper than a legend baked into the artwork and cheaper than giving one a
+whole `.wc-figure-col`. It goes at the end of the `::figure::` slot. Colours are
+the theme's five by name; anything else is passed through as a CSS colour, so a
+swatch can match a hex the plotting script hard-coded.
+
+`<Next>` puts the date in its own gutter, so that next week's deck can be read
+against this week's commitments line by line. `<LastWeek>` is the same row with
+a mark in front of it: paste last week's `<Next>` lines into this week's deck,
+add `state="done" | "partial" | "missed"`, and the slide writes itself. Kept
+promises grey out, so the eye lands on the two that did not happen.
+
+`<Blocker>` is not `<Aside kind="risk">`. A risk might go wrong; a blocker
+already has, and `since` is what gets it cleared — "blocked" gets nodded at,
+"blocked 6 days" gets someone assigned.
+
+`<Runs>` is the sweep table: `[name, progress, state]` per row, plus an optional
+fourth note. A progress written as `3/8` also draws a bar, since the question in
+the room is never the count, it is how much is left.
+
+The starter deck in `template/slides.md` uses every layout and every component
+once, so the fastest way to see what something looks like is to run it and
+delete the slides you do not want.
 
 ## Type and colour
 

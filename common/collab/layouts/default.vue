@@ -1,3 +1,9 @@
+<!--
+  default — every ordinary talk slide.
+
+  The page number is not here: it comes from the theme's root-level
+  `global-bottom.vue`, so that every layout numbers its slides the same way.
+-->
 <template>
   <div class="relative h-full w-full" :style="$frontmatter?.style">
     <div 
@@ -5,14 +11,6 @@
       :class="$frontmatter?.class"
     >
       <slot />
-    </div>
-
-    <div 
-      v-if="!$frontmatter?.hideNumber" 
-      class="absolute bottom-4 right-6 text-sm text-slate-500 pointer-events-none select-none z-50"
-      style="font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', 'URW Palladio L', serif;"
-    >
-      {{ $slidev.nav.currentPage }}
     </div>
   </div>
 </template>

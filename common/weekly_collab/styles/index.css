@@ -381,3 +381,17 @@ html, body, #app, #page-root, #slide-container, #slide-content,
 .wc-aside.is-question { color: var(--wc-orange); background: rgba(235, 140, 0, 0.08); }
 .wc-aside.is-decision { color: var(--wc-green);  background: rgba(46, 139, 87, 0.06); }
 .wc-aside.is-risk     { color: var(--wc-red);    background: rgba(190, 60, 55, 0.06); }
+
+/* 12. METRIC ROW ----------------------------------------------------------
+   A `<Metric>` alone on a markdown line is emitted as a raw HTML block, which
+   makes it a direct child of the slide's flex column and therefore its own
+   row. Wrapping a run of them in this puts them back on one line; the spacing
+   between them is each metric's own right margin, so a lone metric inside a
+   bullet still sits correctly without it. */
+
+.wc-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-bottom: 0.4rem;
+}

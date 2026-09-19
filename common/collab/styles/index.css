@@ -10,6 +10,12 @@
   --color-light-gray: rgb(179, 179, 179);
   --color-dark-gray: rgb(102, 102, 102);
 
+  /* --color-green above is a fill: it is too pale to read as text. These two
+     are the ink versions, shared with the weekly theme so that a status pill
+     means the same colour in a talk as it does in a Monday update. */
+  --color-green-deep: rgb(46, 139, 87);
+  --color-red: rgb(190, 60, 55);
+
   --font-collab: 'Palatino Linotype', 'Palatino Linotype Regular', Palatino, serif;
 }
 
