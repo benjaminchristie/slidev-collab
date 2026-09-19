@@ -1,0 +1,10 @@
+node_modules
+build/
+
+# Docker bind-mount points, created empty inside whichever deck is running
+*/shared
+*/common
+*/*/shared
+*/*/common
+__pycache__/
+*.pyc

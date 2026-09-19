@@ -1,0 +1,16 @@
+{
+  "name": "slidev-theme-weekly-collab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Slidev theme for weekly research-update meetings in the Collaborative Robotics Lab.",
+  "keywords": [
+    "slidev-theme"
+  ],
+  "slidev": {
+    "defaults": {
+      "aspectRatio": "16/9",
+      "canvasWidth": 980,
+      "transition": "fade"
+    }
+  }
+}

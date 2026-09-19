@@ -1,0 +1,360 @@
+:root {
+  --slidev-theme-background: #ffffff !important;
+  --slidev-stage-background: #ffffff !important;
+  --slidev-slide-bg: #ffffff !important;
+
+  --color-emphasis: rgb(204, 112, 0);     /* Darker Collab Orange */
+  --color-green: rgb(160, 212, 164);
+  --color-blue: rgb(42, 143, 189);
+  --color-purple: rgb(141, 95, 211);
+  --color-light-gray: rgb(179, 179, 179);
+  --color-dark-gray: rgb(102, 102, 102);
+
+  --font-collab: 'Palatino Linotype', 'Palatino Linotype Regular', Palatino, serif;
+}
+
+/* 1. VIEWPORT & CONTAINER STAGE BACKGROUNDS */
+html,
+body,
+#app,
+#page-root,
+#slide-container,
+#slide-content,
+.slidev-viewport,
+.slidev-stage,
+.slidev-page,
+.slidev-glass {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #000000;
+}
+
+/* 2. BASE SLIDE CONTAINER & TYPOGRAPHY SCOPING */
+.slidev-layout {
+  min-height: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+  color: #595959;
+  font-family: var(--font-collab) !important;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  padding: 2rem 4.5rem 3rem 4.5rem;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Apply Palatino to all standard text elements without overriding Code or KaTeX */
+.slidev-layout :is(h1, h2, h3, h4, p, span, li, a, td, th, blockquote, div, strong, em, i, b):not(.katex):not(.katex *):not(code):not(pre) {
+  font-family: var(--font-collab);
+}
+
+/* 3. BASE PARAGRAPH & BODY TYPOGRAPHY (Excludes .big-text slides) */
+.slidev-layout:not(.big-text) p,
+.slidev-layout:not(.big-text) li,
+.slidev-layout:not(.big-text) blockquote,
+.slidev-layout:not(.big-text) td {
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+
+.slidev-layout p {
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+  color: #595959;
+}
+
+.slidev-layout p:last-child {
+  margin-bottom: 0;
+}
+
+/* 4. HEADERS */
+.slidev-layout h1 {
+  font-size: 2.75rem !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+  margin-top: 0 !important;
+  margin-bottom: 2.5rem !important;
+  color: #000000;
+  text-align: center;
+}
+
+.slidev-layout h2 {
+  font-size: 2.25rem !important;
+  font-weight: 300 !important;
+  margin-top: 0 !important;
+  margin-bottom: 1.5rem !important;
+  color: #000000;
+  text-align: left;
+}
+
+.slidev-layout h3 {
+  font-size: 1.65rem !important;
+  font-weight: 200 !important;
+  margin-bottom: 1rem !important;
+  color: #000000;
+  text-align: left;
+}
+
+.slidev-layout h1 span,
+.slidev-layout h2 span,
+.slidev-layout h3 span {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
+/* 5. EMPHASIS & COLOR UTILITY CLASSES */
+.slidev-layout strong, .slidev-layout b { color: inherit; font-weight: 700; }
+.slidev-layout em, .slidev-layout .italic, .slidev-layout i { color: inherit; font-style: italic; }
+
+.text-orange { color: var(--color-emphasis) !important; }
+.text-green  { color: var(--color-green) !important; }
+.text-blue   { color: var(--color-blue) !important; }
+.text-purple { color: var(--color-purple) !important; }
+.text-lgray  { color: var(--color-light-gray) !important; }
+.text-dgray  { color: var(--color-dark-gray) !important; }
+
+.text-left, .slidev-layout h1.text-left, .slidev-layout h2.text-left { text-align: left !important; }
+.text-center, .slidev-layout h1.text-center, .slidev-layout h2.text-center { text-align: center !important; }
+.text-right, .slidev-layout h1.text-right, .slidev-layout h2.text-right { text-align: right !important; }
+
+/* 6. CODE BLOCKS & INLINE CODE */
+.slidev-layout pre, .slidev-layout pre *, .slidev-layout code, .slidev-layout code * {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.slidev-layout :not(pre) > code {
+  background-color: #f1f5f9 !important;
+  color: #b91c1c !important;
+  padding: 0.15em 0.4em !important;
+  border-radius: 0.25rem !important;
+  border: 1px solid #e2e8f0 !important;
+  font-size: 0.85em !important;
+}
+
+/* 7. LISTS */
+.slidev-layout ul { list-style-type: "- " !important; padding-left: 3.25rem !important; padding-right: 2rem !important; margin-top: 0.75rem !important; margin-bottom: 1.25rem !important; }
+.slidev-layout ol { list-style-type: decimal !important; padding-left: 2rem !important; margin-top: 0.5rem !important; margin-bottom: 1.25rem !important; }
+.slidev-layout ul ul { list-style-type: circle !important; margin-bottom: 0.25rem !important; }
+.slidev-layout ul ul ul { list-style-type: square !important; }
+.slidev-layout ol ol { list-style-type: lower-alpha !important; margin-bottom: 0.25rem !important; }
+.slidev-layout li { display: list-item !important; margin-bottom: 0.4rem !important; color: #595959; }
+
+/* Bullet lists (ul) only. Ordered lists are left alone so the dense two-column
+   "Selected Works" slides keep their own inline sizing.
+   NOTE: the font-size rule below deliberately omits !important so that an inline
+   utility such as [&_li]:!text-sm can still override it, the same way it overrides
+   the base type scale in section 3. Adding !important here would outrank those
+   utilities on specificity and silently resize slides that opt out. */
+.slidev-layout:not(.big-text) ul li { font-size: 1.35rem; line-height: 1.75; }
+.slidev-layout ul > li { margin-bottom: 0.7rem !important; padding-left: 0.35rem !important; }
+
+/* The "- " marker is a hyphen, which reads thin next to Palatino body copy.
+   Nudge the glyph up slightly so it keeps pace with the larger item text. */
+.slidev-layout ul > li::marker { font-size: 1.15em; }
+
+/* 8. BIG TEXT UTILITY SLIDES */
+.slidev-layout.big-text {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.slidev-layout.big-text p,
+.slidev-layout.big-text span,
+.slidev-layout.big-text em,
+.slidev-layout.big-text strong {
+  font-size: calc(2.25rem * var(--scale, 1)) !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+}
+
+/* 9. HEADER Y-POSITIONING & VERTICAL BALANCE */
+.slidev-layout > :is(h1, h2):first-of-type { margin-top: 0 !important; }
+.slidev-layout > :is(h1, h2):first-of-type + * { margin-top: auto !important; }
+.slidev-layout > :first-child:not(h1):not(h2) { margin-top: auto !important; }
+.slidev-layout > :nth-last-child(1 of :not(.collab-citation)) { margin-bottom: auto !important; }
+.slidev-layout.custom-header > :is(h1, h2):first-of-type + * { margin-top: 0 !important; }
+
+.collab-two-col { align-items: center !important; }
+
+/* 10. KATEX MATH FONT RESTORATION */
+.katex .mathcal { font-family: KaTeX_Caligraphic, serif !important; }
+.katex .mathnormal { font-family: KaTeX_Math, serif !important; font-style: italic !important; }
+.katex .mainrm { font-family: KaTeX_Main, serif !important; }
+.katex .mathbb, .katex .amsrm { font-family: KaTeX_AMS, serif !important; }
+.katex .font-fraktur, .katex .mathfrak { font-family: KaTeX_Fraktur, serif !important; }
+.katex .mathtt { font-family: KaTeX_Typewriter, monospace !important; }
+.katex .mathscr { font-family: KaTeX_Script, serif !important; }
+.katex .mathsf { font-family: KaTeX_SansSerif, sans-serif !important; }
+
+/* 11. MEMO BUILD SEQUENCE
+   One slide, four stacked figures revealed by v-click. The memo_build_*.png files
+   are padded to a shared 6743x2539 canvas with a common top-left origin, so each
+   step is a strict superset of the one before. Fading a superset in ON TOP of an
+   opaque identical base has no cross-fade dip -- which is why this is one slide
+   with clicks rather than four slides with fade transitions.
+
+   v-click hides by setting opacity, NOT display, so hidden elements still occupy
+   space. Both the layers and the captions must therefore be absolutely positioned,
+   or all four would stack and take four times the height. */
+
+/* Fixed box. The figure can only ever shrink to fit (object-fit: contain), never
+   crop, no matter how the heading wraps or how tall the caption is. */
+.memo-stack {
+  position: relative;
+  width: 90%;
+  height: 280px;
+  margin: 0 auto;
+}
+
+.memo-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Slidev's default v-click transition is 100ms, which pops. */
+.memo-layer.slidev-vclick-target {
+  transition: opacity 400ms ease-in-out;
+}
+
+.memo-caption {
+  position: relative;
+  width: 88%;
+  height: 4rem;
+  margin: 1rem auto 0 auto;
+}
+
+.slidev-layout .memo-caption .memo-cap {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+
+.memo-cap.slidev-vclick-target {
+  transition: opacity 400ms ease-in-out;
+}
+
+/* Colour coding, matched to the figure. The two lightest source colours are
+   darkened for legibility as text on white: successful subtasks #8AB38C -> #6B9E70
+   and general guidance #FFAAAA -> #C96A6A. */
+/* These MUST stay prefixed with .slidev-layout. Section 5 sets
+   `.slidev-layout strong, .slidev-layout b { color: inherit; }` at specificity
+   (0,1,1); a bare `.memo-orange` is only (0,1,0) and loses, so the text renders
+   bold but grey. The prefix takes these to (0,2,0), which wins. */
+.slidev-layout .memo-orange { color: var(--color-emphasis); }
+.slidev-layout .memo-red    { color: #C00000; }
+.slidev-layout .memo-purple { color: #8D5FD3; }
+.slidev-layout .memo-green  { color: #6B9E70; }
+.slidev-layout .memo-rose   { color: #C96A6A; }
+/* Same blue family as the Cluster panel on the right of the final figure. The
+   panel's own fill is #C9E2EE, which is 1.35:1 on white and unreadable as text,
+   so this uses the deck's --color-blue (#2A8FBD, 3.64:1) from the same hue. */
+.slidev-layout .memo-blue   { color: var(--color-blue); }
+
+/* 12. CLICK-DRIVEN ENTER / EXIT ANIMATIONS
+   Same behaviour as the locally-scoped rules on the MEMO results slide, hoisted
+   here so any slide can use them. A slide-level <style> placed after a component
+   tag ends up inside the client template, which Vue rejects, so shared animation
+   classes belong in the theme rather than in the markdown. */
+.anim-exit-up.slidev-vclick-target {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.anim-exit-up.slidev-vclick-hidden {
+  transform: translateY(-100%) !important;
+  opacity: 0 !important;
+}
+
+/* Slidev's built-in v-click fade is only ~100ms, which reads as a pop. This class
+   slows it to match the 0.5s .anim-exit-up slide above, so an element revealed on
+   the same click as an exiting one fades in while that one leaves. */
+.anim-fade-in.slidev-vclick-target {
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 13. SELECTED WORKS
+   The theme pins every two-column grid to align-items: center, which also
+   overrides TwoColumn's own `align` prop (an !important declaration beats the
+   component's inline style). On the Selected Works slides the two lists differ
+   in length, so centring drops the shorter column and the first entry of each
+   list no longer lines up. This opt-in class tops both columns instead. */
+.slidev-layout.works-top .collab-two-col { align-items: start !important; }
+
+/* Fixed-height slot so the two logos, which have very different aspect ratios,
+   still push both lists down by exactly the same amount. */
+.slidev-layout.works-top .works-logo {
+  height: 2.5rem;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+.slidev-layout.works-top .works-logo img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+/* 14. MCLQ NESTED LOOPS
+   The double Metropolis-Hastings sampler is two nested loops, so the slide draws
+   them the way code reads: an outer frame enclosing an inner frame. Each frame is
+   its own absolutely-positioned element rather than a border on the content box,
+   so the two can be revealed on separate clicks without the outer one hiding the
+   inner. The labels come from ::before, keeping the markdown free of extra tags. */
+.slidev-layout .loop-wrap { position: relative; padding: 2.3rem 0.5rem 1.4rem; width: 100%; }
+.slidev-layout .loop-row { display: flex; align-items: flex-start; gap: 0.8rem; }
+.slidev-layout .loop-cell { position: relative; flex: 1 1 0; padding: 2.2rem 0.5rem 1.1rem; }
+
+.slidev-layout .loop-frame { position: absolute; inset: 0; border-radius: 0.9rem; border: 2px solid var(--color-emphasis); pointer-events: none; }
+.slidev-layout .loop-frame::before {
+  content: "Outer Loop"; position: absolute; top: 0; left: 1.4rem;
+  transform: translateY(-50%); background: #ffffff; padding: 0 0.5rem;
+  color: var(--color-emphasis); font-style: italic; font-size: 1.25rem;
+}
+.slidev-layout .loop-frame.is-inner { border-color: var(--color-blue); border-radius: 0.7rem; }
+.slidev-layout .loop-frame.is-inner::before { content: "Inner Loop"; color: var(--color-blue); left: 0.9rem; }
+
+.slidev-layout .loop-eq p { margin: 0 0 0.9rem !important; text-align: center; }
+.slidev-layout .loop-eq p:last-child { margin-bottom: 0 !important; }
+.slidev-layout .loop-eq .katex { font-size: 1.29rem; }
+
+/* 15. LABELLED FRAME BOXES (generic)
+   Same construction as the MCLQ loop frames — an absolutely-positioned border so
+   an enclosing frame and the frames nested inside it can be revealed on separate
+   clicks — but the label comes from a data-label attribute instead of being fixed
+   in CSS, so the boxes can be reused for any set of nested terms. */
+.slidev-layout .kset-wrap { position: relative; padding: 2rem 0.45rem 0.9rem; width: 100%; }
+.slidev-layout .kset-row { display: flex; align-items: stretch; gap: 0.6rem; }
+.slidev-layout .kset-cell { position: relative; flex: 1 1 0; padding: 1.5rem 0.35rem 0.7rem; }
+/* The two subsets hold expressions of very different length, so each cell is
+   sized to its own content — with equal cells the longer one caps the type size
+   for both. */
+.slidev-layout .kset-cell.is-narrow { flex: 0.75 1 0; }
+.slidev-layout .kset-cell.is-wide { flex: 1.35 1 0; }
+
+.slidev-layout .kset-frame { position: absolute; inset: 0; border-radius: 0.7rem; border: 2px solid var(--color-blue); pointer-events: none; }
+.slidev-layout .kset-frame::before {
+  content: attr(data-label); position: absolute; top: 0; left: 0.8rem;
+  transform: translateY(-50%); background: #ffffff; padding: 0 0.4rem;
+  color: var(--color-blue); font-style: italic; font-size: 0.9rem; white-space: nowrap;
+}
+.slidev-layout .kset-frame.is-outer { border-color: var(--color-emphasis); border-radius: 0.9rem; }
+.slidev-layout .kset-frame.is-outer::before { color: var(--color-emphasis); font-size: 0.95rem; }
+
+.slidev-layout .kset-eq p { margin: 0 !important; text-align: center; }
+.slidev-layout .kset-eq .katex { font-size: 1.55rem; }
+
+/* A smaller variant of the framed-box equation, for boxes whose expression is
+   long relative to the box width. */
+.slidev-layout .kset-eq.is-compact .katex { font-size: 1.55rem; }

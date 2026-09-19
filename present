@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+#
+# Serve a deck in the browser.
+#
+#   ./present my-talk
+#   ./present 2026-08-31          # a bare name, if one deck matches
+#   ./present meetings/2026-08-31
+#   ./present 2026-08-31 --port 3040
+#
+# The deck is required. There is no default: with seventeen decks in the repo,
+# silently serving one of them is a worse outcome than being told to name it.
+#
+# This wraps `PRESENTATION=<deck> docker compose -f compose.slidev.yml up`
+# rather than taking the deck as a container argument, because Compose resolves
+# bind mounts before the container starts: making the deck folder *be* the
+# project root is what gives instant hot reload, and that has to happen at
+# compose time, not inside the container.
+
+set -euo pipefail
+cd "$(dirname "$0")"
+
+COMPOSE_FILE=compose.slidev.yml
+
+list_decks() {
+  find . -name slides.md \
+       -not -path '*/node_modules/*' \
+       -not -path './common/*' \
+       -not -path './shared/*' \
+       -not -path './build/*' \
+       -printf '%h\n' | sed 's|^\./||' | sort
+}
+
+if [ $# -eq 0 ]; then
+  echo "usage: ./present <deck> [extra compose args...]" >&2
+  echo "" >&2
+  echo "available decks:" >&2
+  list_decks | sed 's/^/  /' >&2
+  exit 2
+fi
+
+deck=$1
+shift
+deck=${deck%/}
+
+if [ ! -f "$deck/slides.md" ]; then
+  # Allow a bare name — "2026-08-31" instead of "meetings/2026-08-31" —
+  # as long as exactly one deck matches.
+  mapfile -t matches < <(list_decks | grep -E "(^|/)$(printf '%s' "$deck" | sed 's/[][\.*^$/]/\\&/g')$" || true)
+  case ${#matches[@]} in
+    1) deck=${matches[0]} ;;
+    0) echo "no such deck: $deck" >&2
+       echo "available:" >&2
+       list_decks | sed 's/^/  /' >&2
+       exit 1 ;;
+    *) echo "ambiguous: $deck matches several decks" >&2
+       printf '  %s\n' "${matches[@]}" >&2
+       exit 1 ;;
+  esac
+fi
+
+echo "serving $deck on http://localhost:3030"
+exec env PRESENTATION="$deck" docker compose -f "$COMPOSE_FILE" up "$@"

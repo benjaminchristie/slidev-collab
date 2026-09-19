@@ -1,0 +1,54 @@
+services:
+  slidev:
+    build:
+      context: .
+      args:
+        SLIDEV_VERSION: "${SLIDEV_VERSION:-52.19.0}"
+    ports:
+      - "3030:3030"
+    # This container must run as root: Slidev is installed globally, and Vite
+    # writes its dependency cache inside the Slidev package's own node_modules,
+    # which a non-root user cannot do (EACCES, and then the app never mounts).
+    #
+    # Root would normally mean Slidev's scratch — node_modules/.slidev, the vite
+    # cache — lands on the host owned by root, because /app is a bind mount of
+    # the deck directory. The tmpfs below keeps that scratch in RAM instead, so
+    # it never touches your disk and never needs sudo to clean up.
+    tmpfs:
+      - /app/node_modules
+    volumes:
+      # The fallback only keeps Compose from warning about an unset variable
+      # when you invoke another service; ./present always sets PRESENTATION,
+      # and a bare `docker compose up` is meant to fail rather than guess.
+      - ./${PRESENTATION:-.}:/app
+      - ./shared:/app/shared:ro # mount templates as read-only
+      - ./common:/app/common:ro # mount shared theme/templates as read-only
+
+  # Batch renderer. Checks that every deck still builds and leaves a PDF of
+  # each in build/, plus build/all-decks.pdf to scroll through everything.
+  #
+  #   docker compose -f compose.slidev.yml run --rm export
+  #   docker compose -f compose.slidev.yml run --rm export my-talk
+  #   CLICKS=1 docker compose -f compose.slidev.yml run --rm export my-talk
+  #
+  # Needs no PRESENTATION: it mounts the whole repo and stages each deck the
+  # way the slidev service's bind mounts do.
+  export:
+    # A one-shot job, not a server. The profile keeps `docker compose up` from
+    # starting it alongside the dev server; `docker compose run export` still
+    # works, because run enables the target service's profiles itself.
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: Dockerfile.export
+      args:
+        SLIDEV_VERSION: "${SLIDEV_VERSION:-52.19.0}"
+    volumes:
+      - .:/repo
+    working_dir: /repo
+    # Root for the same reason as above. The script chowns build/ back to you on
+    # the way out, which root can do and a non-root user could not.
+    environment:
+      CLICKS: "${CLICKS:-0}"
+      HOST_UID: "${DOCKER_UID:-1000}"
+      HOST_GID: "${DOCKER_GID:-1000}"

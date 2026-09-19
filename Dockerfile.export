@@ -1,0 +1,50 @@
+# Batch renderer: turns every deck into a PDF so they can be flipped through
+# and, more importantly, so a deck that fails to build fails loudly.
+#
+# This is deliberately a separate image from the dev-server Dockerfile.
+# `slidev export` drives headless Chromium through Playwright, and Playwright
+# ships no musl build, so this cannot live on the Alpine image.
+
+FROM node:20-bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# poppler-utils   -> pdfunite, to merge the per-deck PDFs into one file
+# fonts-urw-base35 -> URW Palladio, a metric-compatible Palatino clone, so the
+#                     themes' Palatino stack does not fall back to something
+#                     with different metrics and reflow the slides on export
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      poppler-utils \
+      fonts-urw-base35 \
+      fonts-liberation \
+      fonts-dejavu-core \
+      ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Point the theme's font stack at the Palatino clone we just installed.
+RUN printf '%s\n' \
+  '<?xml version="1.0"?>' \
+  '<!DOCTYPE fontconfig SYSTEM "fonts.dtd">' \
+  '<fontconfig>' \
+  '  <alias binding="same"><family>Palatino Linotype</family>' \
+  '    <accept><family>P052</family></accept></alias>' \
+  '  <alias binding="same"><family>Palatino</family>' \
+  '    <accept><family>P052</family></accept></alias>' \
+  '</fontconfig>' > /etc/fonts/conf.d/99-palatino-alias.conf
+
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# Playwright and its browser go in their own layer: this is the slow part of the
+# build (~9 minutes) and it does not depend on which Slidev is pinned below, so
+# changing the pin afterwards only re-runs the cheap layer.
+RUN npm i -g playwright-chromium \
+ && npx playwright install --with-deps chromium \
+ && chmod -R a+rX /ms-playwright
+
+# Pinned, and kept the same as the dev image: the two must not drift, or a deck
+# can render in one and fail in the other.
+ARG SLIDEV_VERSION=52.19.0
+RUN npm i -g "@slidev/cli@${SLIDEV_VERSION}" @slidev/theme-default
+
+WORKDIR /repo
+ENTRYPOINT ["/repo/tools/export-all.sh"]

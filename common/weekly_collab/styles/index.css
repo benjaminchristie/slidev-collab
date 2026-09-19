@@ -1,0 +1,383 @@
+/* ===========================================================================
+   weekly_collab — a Slidev theme for weekly research-update meetings.
+
+   Design goals, in priority order:
+     1. Dense nested bullets must stay legible.  Content is TOP-aligned, never
+        vertically centred, so a 3-bullet slide and a 20-bullet slide start at
+        the same y.
+     2. Sizes are in px/rem against the fixed 980x551 canvas.  Never use `vh`:
+        it resolves against the browser window, not the slide, so a deck would
+        render differently on a laptop and a projector.
+     3. Shares the formal `collab` theme's typeface and accents, so a weekly
+        deck and a talk read as the same lab. What differs is density and
+        alignment, not identity.
+   =========================================================================== */
+
+:root {
+  --slidev-theme-background: #ffffff !important;
+  --slidev-stage-background: #ffffff !important;
+
+  /* Shared with shared/templates/collab so the two decks feel like one lab.
+     The orange sits just below true Collab orange (255, 153, 0) — enough to
+     hold up against white at body-text size, not so dark it reads brown. The
+     formal theme goes darker still; these decks want the warmer end. */
+  --wc-orange: rgb(235, 140, 0);
+  --wc-blue:   rgb(42, 143, 189);
+  --wc-green:  rgb(46, 139, 87);
+  --wc-red:    rgb(190, 60, 55);
+  --wc-purple: rgb(141, 95, 211);
+
+  --wc-ink:     #1d1d1f;
+  --wc-body:    #3c3c41;
+  --wc-muted:   #8a8a90;
+  --wc-hairline:#e2e2e6;
+
+  /* Same stack as shared/templates/collab, so a weekly deck and a talk are
+     visibly the same lab. KaTeX sets its own family and is unaffected. */
+  --wc-font: 'Palatino Linotype', 'Palatino Linotype Regular', Palatino,
+             'Book Antiqua', 'URW Palladio L', P052, Georgia, serif;
+  --wc-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* 1. STAGE ---------------------------------------------------------------- */
+
+html, body, #app, #page-root, #slide-container, #slide-content,
+.slidev-viewport, .slidev-stage, .slidev-page {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+.slidev-layout {
+  height: 100% !important;
+  min-height: 100% !important;
+  box-sizing: border-box !important;
+  padding: 2.1rem 2.6rem 2.2rem 2.6rem;
+  background-color: #ffffff;
+  color: var(--wc-body);
+  font-family: var(--wc-font);
+  font-size: 1.05rem;
+  line-height: 1.5;
+
+  /* Top-aligned by default. Layouts that want centring opt in explicitly. */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* 2. HEADINGS ------------------------------------------------------------- */
+
+.slidev-layout h1 {
+  font-size: 2.4rem !important;
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+  color: var(--wc-ink);
+  margin: 0 0 0.9rem !important;
+}
+
+.slidev-layout h2 {
+  font-size: 1.6rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  color: var(--wc-ink);
+  margin: 0 0 0.35rem !important;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--wc-hairline);
+  flex: none;
+}
+
+.slidev-layout h3 {
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  color: var(--wc-ink);
+  margin: 0 0 0.45rem !important;
+}
+
+/* The heading never stretches; everything after it shares the leftover space.
+   If a slide overflows, that is a signal to split it, not to shrink the type. */
+.slidev-layout > h2 { margin-bottom: 0.9rem !important; }
+.slidev-layout > h2:only-child { margin-bottom: 0 !important; }
+
+/* 3. LISTS — the workhorse ------------------------------------------------ */
+
+.slidev-layout ul {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 0 0 0.5rem !important;
+}
+
+.slidev-layout li {
+  position: relative;
+  padding-left: 1.05rem;
+  margin-bottom: 0.34rem;
+  color: var(--wc-body);
+}
+
+.slidev-layout li::before {
+  content: "";
+  position: absolute;
+  left: 0.15rem;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--wc-blue);
+}
+
+/* Nested levels: smaller, lighter, and a different marker so three levels of
+   indent stay distinguishable at the back of a room. */
+.slidev-layout li ul { margin-top: 0.3rem; margin-bottom: 0.15rem; }
+
+.slidev-layout li li {
+  font-size: 0.92em;
+  color: #55555c;
+  margin-bottom: 0.22rem;
+}
+.slidev-layout li li::before {
+  background: none;
+  border: 1.5px solid var(--wc-muted);
+  width: 5px; height: 5px;
+}
+
+.slidev-layout li li li {
+  font-size: 0.95em;
+  color: var(--wc-muted);
+}
+.slidev-layout li li li::before {
+  background: var(--wc-hairline);
+  border: none;
+  width: 6px; height: 1.5px;
+  border-radius: 0;
+  top: 0.72em;
+}
+
+.slidev-layout ol {
+  padding-left: 1.4rem !important;
+  margin: 0 0 0.5rem !important;
+}
+.slidev-layout ol li { padding-left: 0.2rem; }
+.slidev-layout ol li::before { content: none; }
+
+/* 4. TEXT ----------------------------------------------------------------- */
+
+.slidev-layout p { margin: 0 0 0.7rem; }
+.slidev-layout p:last-child { margin-bottom: 0; }
+
+.slidev-layout strong { color: var(--wc-ink); font-weight: 700; }
+.slidev-layout em { font-style: italic; }
+
+.slidev-layout a {
+  color: var(--wc-blue);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(42, 143, 189, 0.35);
+  word-break: break-word;
+}
+
+.slidev-layout :not(pre) > code {
+  font-family: var(--wc-mono) !important;
+  font-size: 0.85em;
+  background: #f4f4f6;
+  border: 1px solid var(--wc-hairline);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  color: #b23c2e;
+}
+
+.slidev-layout pre {
+  font-family: var(--wc-mono) !important;
+  font-size: 0.8rem !important;
+  border-radius: 6px;
+}
+
+.slidev-layout blockquote {
+  margin: 0 0 0.7rem;
+  padding: 0.1rem 0 0.1rem 0.8rem;
+  border-left: 3px solid var(--wc-hairline);
+  color: var(--wc-muted);
+  font-style: italic;
+}
+
+.slidev-layout table { border-collapse: collapse; font-size: 0.92rem; }
+.slidev-layout th, .slidev-layout td {
+  border-bottom: 1px solid var(--wc-hairline);
+  padding: 0.3rem 0.7rem 0.3rem 0;
+  text-align: left;
+}
+.slidev-layout th { color: var(--wc-ink); font-weight: 700; }
+
+/* 5. ACCENT UTILITIES ----------------------------------------------------- */
+
+.wc-orange { color: var(--wc-orange) !important; }
+.wc-blue   { color: var(--wc-blue) !important; }
+.wc-green  { color: var(--wc-green) !important; }
+.wc-red    { color: var(--wc-red) !important; }
+.wc-muted  { color: var(--wc-muted) !important; }
+
+/* An "eyebrow": the small topic label above a heading. */
+.wc-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--wc-orange);
+  margin-bottom: 0.15rem;
+}
+
+/* 6. SLIDE NUMBER --------------------------------------------------------- */
+
+.slidev-page .slidev-layout::after { content: none; }
+
+/* 7. FIGURES -------------------------------------------------------------- */
+
+.wc-figure {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding-top: 0.6rem;
+}
+.wc-figure img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.wc-figure-caption {
+  font-size: 0.85rem;
+  color: var(--wc-muted);
+  text-align: center;
+}
+
+/* A row of figure columns that share the remaining height. Each column's
+   flex-grow is set inline, in proportion to how wide that artwork was on the
+   original slide, so a legend swatch does not get the same room as a plot. */
+.wc-figure-row {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding-top: 0.6rem;
+}
+.wc-figure-row > * { min-width: 0; }
+
+.wc-figure-col {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.slidev-layout figure {
+  margin: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.slidev-layout figure img {
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.slidev-layout figcaption {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--wc-muted);
+  text-align: center;
+}
+
+/* 8. TWO COLUMNS ---------------------------------------------------------- */
+
+.wc-cols {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  gap: 1.6rem;
+  padding-top: 0.85rem;
+  align-content: start;
+}
+.wc-col { min-width: 0; }
+.wc-col > h3 {
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.55rem !important;
+  border-bottom: 1px solid var(--wc-hairline);
+  color: var(--wc-orange);
+  font-size: 1rem !important;
+  letter-spacing: 0.02em;
+}
+
+/* 9. DENSITY ESCAPE HATCHES ----------------------------------------------
+   Put `class: dense` (or `x-dense`) in a slide's frontmatter when a slide
+   genuinely needs to carry more than fits at the default size. */
+
+.slidev-layout.dense   { font-size: 0.95rem; }
+.slidev-layout.dense li  { margin-bottom: 0.26rem; }
+.slidev-layout.x-dense { font-size: 0.86rem; line-height: 1.45; }
+.slidev-layout.x-dense li { margin-bottom: 0.2rem; }
+.slidev-layout.x-dense h2 { font-size: 1.4rem !important; }
+
+/* 10. LAYOUT-SPECIFIC RULES ------------------------------------------------
+   These live here rather than in a layout's <style scoped> block because slot
+   content is compiled in the parent's scope: a layout's scoped styles never
+   reach the markdown it wraps. */
+
+/* cover */
+.slidev-layout.cover { justify-content: center; }
+.wc-cover { max-width: 46rem; }
+.wc-cover h1 { margin-bottom: 0 !important; }
+.wc-cover-with {
+  margin-top: 0.9rem;
+  font-size: 1rem;
+  color: var(--wc-muted);
+}
+
+/* section */
+.slidev-layout.section { justify-content: center; align-items: flex-start; }
+.wc-section h1,
+.wc-section h2 {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  font-size: 2.2rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+.wc-section p {
+  margin-top: 0.7rem;
+  font-size: 1.15rem;
+  color: var(--wc-muted);
+  max-width: 44rem;
+}
+
+/* figure layout: an empty caption slot must not reserve space */
+.slidev-layout.figure .wc-figure-caption:empty { display: none; }
+
+/* 11. ASIDE ---------------------------------------------------------------
+   Styled globally so the slot content inherits correctly. */
+
+.wc-aside {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0.55rem 0;
+  padding: 0.45rem 0.7rem;
+  border-left: 3px solid currentColor;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.95em;
+}
+.wc-aside-tag {
+  flex: none;
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.wc-aside-body { color: var(--wc-body); }
+.wc-aside-body p { margin: 0 !important; }
+.wc-aside.is-question { color: var(--wc-orange); background: rgba(235, 140, 0, 0.08); }
+.wc-aside.is-decision { color: var(--wc-green);  background: rgba(46, 139, 87, 0.06); }
+.wc-aside.is-risk     { color: var(--wc-red);    background: rgba(190, 60, 55, 0.06); }
