@@ -21,8 +21,7 @@ services:
       # when you invoke another service; ./present always sets PRESENTATION,
       # and a bare `docker compose up` is meant to fail rather than guess.
       - ./${PRESENTATION:-.}:/app
-      - ./shared:/app/shared:ro # mount templates as read-only
-      - ./common:/app/common:ro # mount shared theme/templates as read-only
+      - ./common:/app/common:ro # mount the themes as read-only
 
   # Batch renderer. Checks that every deck still builds and leaves a PDF of
   # each in build/, plus build/all-decks.pdf to scroll through everything.

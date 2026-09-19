@@ -1,7 +1,7 @@
 # weekly_collab
 
 A Slidev theme for weekly research-update meetings, plus a starter deck. It is
-deliberately plainer than `shared/templates/collab` (the formal talk theme):
+deliberately plainer than `common/collab` (the formal talk theme):
 these are working documents, read fast, and dense nested bullets have to stay
 legible.
 
@@ -19,7 +19,8 @@ Then run it the same way as any other deck in this repo:
 ```
 
 `compose.slidev.yml` mounts `./common` read-only at `/app/common`, which is why
-every deck's frontmatter says `theme: ./common/weekly_collab`.
+every deck's frontmatter says `theme: ./common/weekly_collab`. Both themes live
+under `common/`; the formal-talk theme is `./common/collab`.
 
 ## Layouts
 
@@ -49,7 +50,7 @@ it getting skipped.
 ## Type and colour
 
 The theme uses the same Palatino stack and the same blue as
-`shared/templates/collab`, so a weekly deck and a conference talk read as the
+`common/collab`, so a weekly deck and a conference talk read as the
 same lab — what separates them is density and alignment, not identity.
 
 The orange is `rgb(235, 140, 0)`: just below true Collab orange

@@ -15,7 +15,7 @@ edit `examples/talk/slides.md`.
 ```
 examples/talk/              example deck using the formal theme
 examples/weekly-update/     example deck using the meeting theme
-shared/templates/collab/    formal-talk theme
+common/collab/              formal-talk theme
 common/weekly_collab/       weekly-update theme + starter template
 compose.slidev.yml          dev server + batch renderer
 present                     ./present <deck>
@@ -44,7 +44,7 @@ CLICKS=1 docker compose -f compose.slidev.yml run --rm export talk  # one page p
 
 ## The two themes
 
-**`shared/templates/collab`** — formal talks. Palatino, centred headings, layouts for section dividers (`split-bg`), full-bleed statements (`big-text`), and a `TwoColumn` component.
+**`common/collab`** — formal talks. Palatino, centred headings, layouts for section dividers (`split-bg`), full-bleed statements (`big-text`), and a `TwoColumn` component.
 
 **`common/weekly_collab`** — weekly updates. Same typeface and palette so the two read as one group, but content is **top-aligned rather than centred**, so a three-bullet slide and a twenty-bullet slide start at the same y and headings do not jump as you page through. Three levels of bullet nesting stay legible. Layouts: `cover`, `two-cols`, `figure`, `section`. Components:
 

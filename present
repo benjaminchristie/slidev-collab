@@ -25,7 +25,6 @@ list_decks() {
   find . -name slides.md \
        -not -path '*/node_modules/*' \
        -not -path './common/*' \
-       -not -path './shared/*' \
        -not -path './build/*' \
        -printf '%h\n' | sed 's|^\./||' | sort
 }

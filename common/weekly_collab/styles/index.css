@@ -17,7 +17,7 @@
   --slidev-theme-background: #ffffff !important;
   --slidev-stage-background: #ffffff !important;
 
-  /* Shared with shared/templates/collab so the two decks feel like one lab.
+  /* Shared with common/collab so the two decks feel like one lab.
      The orange sits just below true Collab orange (255, 153, 0) — enough to
      hold up against white at body-text size, not so dark it reads brown. The
      formal theme goes darker still; these decks want the warmer end. */
@@ -32,7 +32,7 @@
   --wc-muted:   #8a8a90;
   --wc-hairline:#e2e2e6;
 
-  /* Same stack as shared/templates/collab, so a weekly deck and a talk are
+  /* Same stack as common/collab, so a weekly deck and a talk are
      visibly the same lab. KaTeX sets its own family and is unaffected. */
   --wc-font: 'Palatino Linotype', 'Palatino Linotype Regular', Palatino,
              'Book Antiqua', 'URW Palladio L', P052, Georgia, serif;

@@ -1,5 +1,5 @@
 ---
-theme: ./shared/templates/collab
+theme: ./common/collab
 title: "Example Talk"
 transition: fade
 ---

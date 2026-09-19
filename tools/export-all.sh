@@ -9,9 +9,9 @@
 # Output lands in build/. With no arguments every deck is rendered; otherwise
 # only the deck directories named on the command line.
 #
-# Each deck is staged into a scratch directory with `common/` and `shared/`
-# copied in beside it, because a deck's `theme:` path is resolved relative to
-# its own slides.md — the same reason compose bind-mounts them into /app.
+# Each deck is staged into a scratch directory with `common/` copied in beside
+# it, because a deck's `theme:` path is resolved relative to its own slides.md
+# — the same reason compose bind-mounts it into /app.
 
 set -uo pipefail
 
@@ -27,7 +27,6 @@ find_decks() {
   find "$1" -name slides.md \
        -not -path '*/node_modules/*' \
        -not -path './common/*' \
-       -not -path './shared/*' \
        -not -path './build/*' \
        -printf '%h\n' | sed 's|^\./||' | sort
 }
@@ -81,9 +80,8 @@ for deck in "${decks[@]}"; do
 
   # Stage the deck exactly as the dev server sees it.
   cp -r "$REPO/$deck/." "$work/" 2>/dev/null
-  rm -rf "$work/common" "$work/shared" "$work/node_modules" "$work/dist"
+  rm -rf "$work/common" "$work/node_modules" "$work/dist"
   [ -d "$REPO/common" ] && cp -r "$REPO/common" "$work/common"
-  [ -d "$REPO/shared" ] && cp -r "$REPO/shared" "$work/shared"
 
   args=(export slides.md --format pdf --output "$OUT/$name.pdf" --timeout "$TIMEOUT")
   [ "$CLICKS" = "1" ] && args+=(--with-clicks)
