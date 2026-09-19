@@ -22,7 +22,9 @@ present                     ./present <deck>
 tools/export-all.sh         renders every deck to PDF
 ```
 
-A "deck" is any directory containing a `slides.md`.
+A "deck" is any directory containing a `slides.md`. Images live in that same
+directory under `public/`, and are referenced from the deck root: a file at
+`public/assets/plot.png` is `<img src="/assets/plot.png" />` in the markdown.
 
 ## Writing a deck
 

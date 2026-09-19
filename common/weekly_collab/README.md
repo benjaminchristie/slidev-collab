@@ -60,6 +60,32 @@ the warmer end. Both live as custom properties on `:root`, so changing
 `--wc-orange` once updates the eyebrow, the column headings, `<Status ask>` and
 `<Aside>` together.
 
+## Images
+
+Anything under the deck's own `public/` is served from the deck root, so a file
+at `public/assets/plot.png` is `/assets/plot.png` in the markdown:
+
+```
+---
+layout: figure
+---
+
+## Preliminary results
+
+::figure::
+
+<img src="/assets/plot.png" alt="Describe what the plot shows" />
+
+::caption::
+
+What the reader should take away from this plot.
+```
+
+The path is absolute — `/assets/...`, not `./assets/...` — and `public/` itself
+is not part of it. The starter template ships a placeholder
+`public/assets/example.png`; overwrite it with your own figure. A missing file
+does not degrade quietly: Vite fails the import and the slide never renders.
+
 ## Conventions worth keeping
 
 - **Content is top-aligned, never vertically centred.** A three-bullet slide and
