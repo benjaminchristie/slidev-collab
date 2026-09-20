@@ -413,7 +413,7 @@ transition: sc-wipe
 ---
 layout: demo
 feature: "SVG charts, no library"
-syntax: "components/LiveChart.vue"
+syntax: "common/collab/components/LiveChart.vue"
 clicks: 2
 transition: slide-left
 ---
@@ -425,13 +425,22 @@ transition: slide-left
 <div>
 <LiveChart
   unit="%"
+  x-unit="k"
+  :height="235"
+  x-label="training steps"
   :reveal="$clicks + 1"
   :animate="$renderContext !== 'print'"
-  :labels="['0k','2k','4k','6k','8k','10k','12k','14k','16k','18k','20k','22k','24k','26k','28k','30k','32k','34k','36k','38k','40k','42k','44k','46k','48k']"
+  :x="[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48]"
   :series="[
-    { name: 'ours', color: '#cc7000', data: [0,9.7,19.8,26.4,34.3,39.8,44.3,49.7,52.5,56.8,58.9,61.5,64.4,67.2,67.3,69,71.1,72.9,73,73.4,75.4,74,76.3,75.5,75.6] },
-    { name: 'ablation', color: '#8d5fd3', data: [1.2,7.3,15.3,22.5,26.7,32.5,35.8,41.2,42.4,42.8,46,48.8,54.8,56.4,58,59.2,61.3,62.7,62.6,63.9,63.2,65.4,65.9,67.2,67.3] },
-    { name: 'baseline', color: '#2a8fbd', data: [0,5.8,13,16.3,22,26.3,29.3,33.1,34.7,37.4,40.2,43.7,44.9,46.3,48.6,49.7,50.5,53,53.7,53.4,55.1,55.7,57.3,57.5,56.8] },
+    { name: 'ours', color: '#cc7000',
+      data: [0,9.7,19.8,26.4,34.3,39.8,44.3,49.7,52.5,56.8,58.9,61.5,64.4,67.2,67.3,69,71.1,72.9,73,73.4,75.4,74,76.3,75.5,75.6],
+      sem: [0,3.1,3.4,3.2,3,2.8,2.7,2.6,2.5,2.4,2.4,2.3,2.2,2.2,2.1,2.1,2,2,1.9,1.9,1.8,1.8,1.8,1.7,1.7] },
+    { name: 'ablation', color: '#8d5fd3',
+      data: [1.2,7.3,15.3,22.5,26.7,32.5,35.8,41.2,42.4,42.8,46,48.8,54.8,56.4,58,59.2,61.3,62.7,62.6,63.9,63.2,65.4,65.9,67.2,67.3],
+      sem: [0.5,2.7,3,3.1,3,2.9,2.9,2.8,2.8,2.7,2.7,2.6,2.6,2.5,2.5,2.4,2.4,2.3,2.3,2.3,2.2,2.2,2.1,2.1,2.1] },
+    { name: 'baseline', color: '#2a8fbd',
+      data: [0,5.8,13,16.3,22,26.3,29.3,33.1,34.7,37.4,40.2,43.7,44.9,46.3,48.6,49.7,50.5,53,53.7,53.4,55.1,55.7,57.3,57.5,56.8],
+      sem: [0,2.2,2.5,2.6,2.6,2.5,2.5,2.4,2.4,2.3,2.3,2.2,2.2,2.2,2.1,2.1,2,2,2,1.9,1.9,1.9,1.8,1.8,1.8] },
   ]" />
 </div>
 
@@ -439,8 +448,9 @@ transition: slide-left
 
 ### Hover it
 
-The crosshair reads out every visible series at that step. Nobody has to squint
-at a legend and guess which line was which at 30k.
+The crosshair reads out every visible series at that step, mean and SEM
+together. Nobody has to squint at a legend and guess which line was which at
+30k, or eyeball whether two clouds overlap.
 
 ### One click, one claim
 
@@ -1058,7 +1068,7 @@ transition: slide-left
 | Pull code out of a real file | slide 10 &middot; `<<< @/snippets/file#region` |
 | A terminal that types itself | slide 11 &middot; `components/Terminal.vue` |
 | Edit and run code on stage | slide 12 &middot; `components/CodePlayground.vue` |
-| A chart with no chart library | slide 14 &middot; `components/LiveChart.vue` |
+| A chart with no chart library | slide 14 &middot; `common/collab/components/LiveChart.vue` |
 | Numbers that count up | slide 15 &middot; `components/StatCard.vue` |
 | A table you can re-sort live | slide 16 &middot; `components/SortableTable.vue` |
 | A diagram written as text | slide 18 &middot; a `mermaid` fence |

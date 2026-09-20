@@ -3,32 +3,28 @@
 A ready-to-run [Slidev](https://sli.dev) setup for research talks and meetings.
 
 ```bash
-git clone https://github.com/benjaminchristie/slidev-collab.git slides && cd slides
+git clone <this-repo> slides && cd slides
 ./present talk
 ```
 
 That serves the example talk at <http://localhost:3030>, hot-reloading as you
-edit `examples/talk/slides.md`. Once the server answers, two browser tabs open:
-the deck, and the presenter view behind it. `./present my-talk --no-open` skips
-them.
+edit `examples/talk/slides.md`.
 
 ## Layout
 
 ```
 examples/talk/              example deck using the formal theme
 examples/weekly-update/     example deck using the meeting theme
-examples/showcase/          everything Slidev can do, in one deck
 common/collab/              formal-talk theme
 common/weekly_collab/       weekly-update theme + starter template
 compose.slidev.yml          dev server + batch renderer
 present                     ./present <deck>
+record                      ./record <deck>  -> build/<deck>.mp4
 tools/export-all.sh         renders every deck to PDF
-tools/open-when-ready.sh    waits for the server, then opens the browser
+tools/record-video.sh       plays a deck and records it as video
 ```
 
-A "deck" is any directory containing a `slides.md`. Images live in that same
-directory under `public/`, and are referenced from the deck root: a file at
-`public/assets/plot.png` is `<img src="/assets/plot.png" />` in the markdown.
+A "deck" is any directory containing a `slides.md`.
 
 ## Writing a deck
 
@@ -39,38 +35,6 @@ cp -r common/weekly_collab/template meetings/2026-10-06
 
 Run `./present` with no arguments to list what it can see.
 
-## Presenting
-
-While the deck is open in a browser:
-
-| Key             | What it does                                    |
-|-----------------|-------------------------------------------------|
-| `space` or `→`  | Next click step, or next slide                  |
-| `←`             | One step back                                   |
-| `↓` / `↑`       | Next / previous whole slide, skipping clicks    |
-| `g`             | Go to a slide number                            |
-| `o`             | Every slide at once; click one to jump there    |
-| `f`             | Fullscreen                                      |
-| `d`             | Dark mode                                       |
-
-`./present <deck>` answers on more than one URL at `localhost:3030`, and opens
-the first two for you:
-
-| URL           | What it is                                            |
-|---------------|-------------------------------------------------------|
-| `/`           | The deck                                              |
-| `/presenter`  | Notes, timer and next slide — keep this on your laptop |
-| `/overview`   | Every slide on one scrollable page                    |
-| `/notes-edit` | Every speaker note in the deck, editable in one place  |
-| `/export`     | Render a PDF from the browser                         |
-
-The presenter tab is opened second, so it is the one in front: that is the one
-you drive from, and the deck tab is the one you drag onto the projector.
-
-Speaker notes are HTML comments at the end of a slide; the audience never sees
-them. Both example decks carry notes explaining the deck as you page through it
-in presenter mode.
-
 ## Checking every deck builds
 
 ```bash
@@ -80,9 +44,40 @@ docker compose -f compose.slidev.yml run --rm export talk       # one deck
 CLICKS=1 docker compose -f compose.slidev.yml run --rm export talk  # one page per click
 ```
 
+## Rendering a deck as a video
+
+```bash
+./record talk                          # -> build/talk.mp4
+./record talk --dwell 6                # six seconds on each click step
+./record talk --width 2560 --height 1440
+```
+
+The deck is played in a headless browser and the screen is recorded, so click
+animations, slide transitions and embedded video all survive into the file —
+which a slideshow assembled from stills would not. It runs in real time,
+waits for each step's animations to finish and then holds `--dwell` seconds on
+the settled slide, stopping when a keypress no longer changes anything. A
+slide can set its own hold in frontmatter with `dwell: 14`.
+
+Fonts come from your machine: `./record` mounts `~/.fonts` and
+`~/.local/share/fonts` read-only and reports any family the deck asks for that
+fontconfig had to substitute.
+
+The export image gains ffmpeg and Google Chrome for this (`Dockerfile.export`);
+Chrome because Playwright's bundled Chromium has no H.264 decoder, so a slide
+playing an `.mp4` would otherwise record as a black rectangle. The build fails
+if Chrome did not install, rather than leaving you to find out in the video.
+Ask an image you already have with `./record --check`. A recording of a deck
+that has `.mp4` in it also refuses to start without Chrome, rather than
+spending ten minutes producing black rectangles — `--allow-chromium` if you
+want it anyway. If it predates this,
+rebuild: `docker compose -f compose.slidev.yml build export`.
+
+There is no audio track. Record narration separately and mux it in with ffmpeg.
+
 ## The two themes
 
-**`common/collab`** — formal talks, job talks, defenses. Palatino, centred headings, layouts for section dividers (`split-bg`), full-bleed statements (`big-text`), and components for the claims slide (`Contribution`), the one-line argument of a slide (`Takeaway`), references (`Cite` / `Citation`), the plan (`Timeline`) and question-and-answer slides (`Backup`).
+**`common/collab`** — formal talks. Palatino, centred headings, layouts for section dividers (`split-bg`), full-bleed statements (`big-text`), and a `TwoColumn` component.
 
 **`common/weekly_collab`** — weekly updates. Same typeface and palette so the two read as one group, but content is **top-aligned rather than centred**, so a three-bullet slide and a twenty-bullet slide start at the same y and headings do not jump as you page through. Three levels of bullet nesting stay legible. Layouts: `cover`, `two-cols`, `figure`, `section`. Components:
 
@@ -90,40 +85,9 @@ CLICKS=1 docker compose -f compose.slidev.yml run --rm export talk  # one page p
 <Status done />  <Status wip />  <Status blocked />  <Status ask />
 <Aside>The question you want answered in this meeting.</Aside>
 <Aside kind="decision">Submitting to ICRA, not RSS.</Aside>
-<Metric value="47%" label="success rate" delta="+16" />
-<Blocker since="6 days" who="Priya">Eval cluster queue times</Blocker>
-<Next by="Mon">Rerun seeds 4-8 on the new reward</Next>
-<LastWeek by="Mon" state="done">Rerun seeds 4-8</LastWeek>
 ```
 
-Plus `Legend` for the series in a figure and `Runs` for a sweep table.
-
-See `common/weekly_collab/README.md` and `common/collab/README.md` for the full
-reference. Each theme's example deck under `examples/` uses every layout and
-component it ships.
-
-## The showcase deck
-
-```bash
-./present showcase
-```
-
-`examples/showcase` is a third example, and a different kind of thing: thirty-four
-slides of what Slidev can do when a slide is allowed to be a web page. Code that
-morphs between versions and code you can edit and run, charts you can hover,
-a results table you can re-sort from the stage, Mermaid, KaTeX, annotations you
-drag into place, a two-link arm solving inverse kinematics, and three optimisers
-arguing about a loss surface. Every slide names the feature it is demonstrating
-in a badge at the top right.
-
-Nothing was installed to build it — it runs on the same pinned Slidev in the
-same container as the other two. It also shows how a deck extends `common/collab`
-*locally*: ten components, four layouts and a stylesheet, all living next to its
-own `slides.md` and none of them touching the shared theme.
-
-Unlike the other two examples this one is not a template to copy wholesale.
-Take the slide you want and the component under it. See
-`examples/showcase/README.md`.
+See `common/weekly_collab/README.md` for the full reference.
 
 ## Importing from Google Slides
 

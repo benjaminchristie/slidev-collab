@@ -45,6 +45,19 @@ The easy case was already solved <Cite n="1" />, the hard one was not <Cite n="2
 
 <FigureCaption src="/assets/plot.png" caption="What to take away." />
 
+<div>
+<LiveChart
+  :series="[
+    { name: 'ours', color: 'var(--color-emphasis)', data: [...], sem: [...] },
+    { name: 'baseline', color: 'var(--color-blue)', data: [...], lo: [...], hi: [...] },
+    { name: 'oracle', color: 'var(--color-green)', data: [...], dashed: true },
+  ]"
+  :x="[0, 1.5, 3]" :ticks="[0, 2, 4]"
+  x-label="Hours of Interaction Data" y-label="Success Rate (%)" unit="%"
+  :min="20" :max="80" :reveal="$clicks + 1"
+  :animate="$renderContext !== 'print'" />
+</div>
+
 <TwoColumn ratio="2fr 1fr">Left<template #right>Right</template></TwoColumn>
 
 <Backup q="Why not a Kalman filter?" />
@@ -78,6 +91,49 @@ reference inside it rather than one per reference.
 the last slide of the talk: they stay reachable from the slide picker (`o`),
 which is how you find one mid-question. Frontmatter `hide: true` removes a slide
 from navigation entirely, which is the opposite of what a backup slide is for.
+
+`<LiveChart>` is a plotted figure that stays a figure: hovering it reads out x
+and every visible series at that x, mean and cloud together, which is the
+question that actually gets asked in a defense. A series is `{ name, color,
+data }` plus `sem`, or `lo`/`hi`, for the shaded band, and `dashed: true` for a
+baseline — which the legend draws dashed too, because each key is the line
+itself rather than a coloured block. `reveal` is how many series to draw, so `$clicks + 1` walks them onto
+the slide in the order the work happened; pin `min` and `max` when you do that,
+or the axis moves under the curves already on screen.
+
+Points sit at their real `x` value. `scale` replaces that with knots —
+`[[value, position], ...]` — for a broken axis, and `axis-break` draws the mark
+that says the axis is broken. `sync` gives two charts one crosshair, which is
+what makes a two-panel figure read as one figure.
+
+Every reading in the legend carries a spread, `41.2 ± 2.6%`, including the
+baselines whose spread is zero — a ragged column of readings is what makes a
+legend look broken, and a constant really is a value with no spread. The keys
+are laid out on a grid of equal columns for the same reason.
+
+Two props exist because a chart on a slide is not a chart on a page.
+`font-size` (15px by default) sets the tick type and everything else scales
+off it; `legend-size` sets the series names, 1.3x that by default, because the
+names are the one thing on a figure that has to carry to the back of the room.
+Both are sized for a room rather than a laptop, and worth raising further for
+a small figure in a wide column.
+
+The chart measures its own text rather than estimating it, so the y margin and
+the number of legend columns come out right whichever serif the machine
+actually has — and where a wider face would cost the legend an extra row, it
+gives up to 15% of its type size instead, so a figure occupies the same height
+on any machine. All of it is laid out in the slide's own coordinates, so none
+of it changes with the screen it is projected onto. `delay` is how long the
+chart waits, after it is genuinely on screen, before the curves draw
+themselves in; the default 450ms lets a slide transition or a click reveal
+finish first, so the drawing is not spent behind something the audience cannot
+see yet. Step back behind the click and it will play again.
+
+Keep the numbers out of the slide. A figure used more than once, or with more
+than a handful of points, is worth a small wrapper in the deck's own
+`components/` folder that holds the data and names the figure — the slide then
+says only which figure it wants, and the same wrapper can serve a build and its
+payoff through `reveal`.
 
 `<Timeline>` is for proposals and defenses, where the question is where the work
 sits against the plan. Three to five stops; past that it is a Gantt chart, and

@@ -73,8 +73,9 @@ back.
 <Terminal :step="$clicks" :typing="$renderContext !== 'print'"
           :rows="9" :lines="[['cmd', './present showcase'], ['ok', 'ready']]" />
 
-<LiveChart :series="[{ name: 'ours', color: '#cc7000', data: [...] }]"
-           :labels="[...]" :reveal="$clicks + 1" unit="%" />
+<!-- LiveChart lives in the theme, not this deck: common/collab/components -->
+<LiveChart :series="[{ name: 'ours', color: '#cc7000', data: [...], sem: [...] }]"
+           :x="[...]" :reveal="$clicks + 1" unit="%" x-unit="k" />
 
 <StatCard :value="75.6" unit="%" :decimals="1" label="success rate"
           :delta="18.8" :spark="[34, 44, 52, 59, 64, 71, 76]" />

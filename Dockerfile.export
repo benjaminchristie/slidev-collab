@@ -46,5 +46,38 @@ RUN npm i -g playwright-chromium \
 ARG SLIDEV_VERSION=52.19.0
 RUN npm i -g "@slidev/cli@${SLIDEV_VERSION}" @slidev/theme-default
 
+# ---- video recording -------------------------------------------------------
+# Added after the Slidev install rather than folded into the apt layer above,
+# so that picking this up costs one cheap layer instead of a nine-minute
+# Playwright rebuild.
+#
+# ffmpeg turns Playwright's VP8 webm into an H.264 mp4 that plays anywhere.
+#
+# Google Chrome, for a less obvious reason: Playwright's bundled Chromium is
+# the open-source build, and the open-source build carries no H.264 decoder.
+# A deck with .mp4 assets records those slides as a black rectangle.
+#
+# The install is verified in the same layer and the build fails if it did not
+# land. A recorder that silently produces black rectangles is worse than one
+# that refuses to be built, and "it probably installed" is not something you
+# want to discover in the finished video. Opt out deliberately on a machine
+# that cannot reach Google and only needs PDF export:
+#
+#   docker compose -f compose.slidev.yml build --build-arg WITH_CHROME=0 export
+ARG WITH_CHROME=1
+RUN if [ "$WITH_CHROME" != "1" ]; then \
+      echo "WITH_CHROME=0: recordings will use Chromium, and .mp4 slides will be black"; \
+    elif npx playwright install chrome && google-chrome --version; then \
+      echo "Google Chrome installed; recordings can decode H.264"; \
+    else \
+      echo ""; \
+      echo "ERROR: Google Chrome did not install, and recordings need it for H.264."; \
+      echo "       Without it every .mp4 slide records as a black rectangle."; \
+      echo "       To build anyway, without video recording support:"; \
+      echo "         docker compose -f compose.slidev.yml build \\"; \
+      echo "           --build-arg WITH_CHROME=0 export"; \
+      exit 1; \
+    fi
+
 WORKDIR /repo
 ENTRYPOINT ["/repo/tools/export-all.sh"]

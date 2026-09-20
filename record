@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+#
+# Render a deck to an mp4.
+#
+#   ./record my-talk
+#   ./record 2026-08-31              # a bare name, if one deck matches
+#   ./record my-talk --dwell 6        # six seconds on each click step
+#   ./record my-talk --width 2560 --height 1440
+#   ./record --check                 # can this image decode .mp4 slides?
+#
+# Output lands in build/<deck>.mp4. This plays the deck in a headless browser
+# and records the screen, so it runs in real time: a forty-step talk at four
+# seconds a step takes a few minutes, plus encoding.
+#
+# The companion of ./present, and it resolves a deck name the same way. The
+# work happens in tools/record-video.sh, inside the export image.
+
+set -euo pipefail
+cd "$(dirname "$0")"
+
+COMPOSE_FILE=compose.slidev.yml
+
+list_decks() {
+  find . -name slides.md \
+       -not -path '*/node_modules/*' \
+       -not -path './common/*' \
+       -not -path './build/*' \
+       -printf '%h\n' | sed 's|^\./||' | sort
+}
+
+# `./record --check` asks the image what it can do and takes no deck.
+if [ "${1:-}" = "--check" ]; then
+  CHECK_ONLY=1
+fi
+
+if [ "${CHECK_ONLY:-0}" != "1" ] && [ $# -eq 0 ]; then
+  echo "usage: ./record <deck> [--dwell 4] [--fps 30] [--width 1920] [--height 1080]" >&2
+  echo "       ./record --check     # can this image decode .mp4 slides?" >&2
+  echo "" >&2
+  echo "available decks:" >&2
+  list_decks | sed 's/^/  /' >&2
+  exit 2
+fi
+
+deck=""
+if [ "${CHECK_ONLY:-0}" != "1" ]; then
+  deck=${1%/}
+  shift
+fi
+
+if [ "${CHECK_ONLY:-0}" != "1" ] && [ ! -f "$deck/slides.md" ]; then
+  mapfile -t matches < <(list_decks | grep -E "(^|/)$(printf '%s' "$deck" | sed 's/[][\.*^$/]/\\&/g')$" || true)
+  case ${#matches[@]} in
+    1) deck=${matches[0]} ;;
+    0) echo "no such deck: $deck" >&2
+       echo "available:" >&2
+       list_decks | sed 's/^/  /' >&2
+       exit 1 ;;
+    *) echo "ambiguous: $deck matches several decks" >&2
+       printf '  %s\n' "${matches[@]}" >&2
+       exit 1 ;;
+  esac
+fi
+
+# Your fonts, not the container's.
+#
+# The export image installs URW Palladio, a metric-compatible Palatino clone,
+# so that exported PDFs lay out identically to the dev server. Identical
+# layout is not identical glyphs, though, and in a video you can see the
+# difference. Mounting the host's font directories read-only means the
+# recording uses the same faces your browser does.
+fonts=()
+n=0
+for dir in "$HOME/.fonts" "$HOME/.local/share/fonts" "$HOME/Library/Fonts"; do
+  if [ -d "$dir" ]; then
+    fonts+=(-v "$dir:/usr/local/share/fonts/host$n:ro")
+    n=$((n + 1))
+  fi
+done
+
+exec docker compose -f "$COMPOSE_FILE" run --rm \
+  --entrypoint /repo/tools/record-video.sh \
+  ${fonts[@]+"${fonts[@]}"} \
+  -e "HOST_UID=${DOCKER_UID:-$(id -u)}" \
+  -e "HOST_GID=${DOCKER_GID:-$(id -g)}" \
+  export ${deck:+"$deck"} "$@"
