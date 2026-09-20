@@ -101,6 +101,10 @@ itself rather than a coloured block. `reveal` is how many series to draw, so `$c
 the slide in the order the work happened; pin `min` and `max` when you do that,
 or the axis moves under the curves already on screen.
 
+Curves draw themselves in by sweeping a clip from the left edge of the plot,
+which is why a series' cloud arrives piece by piece alongside its mean rather
+than appearing whole, and why a dashed baseline draws in like everything else.
+
 Points sit at their real `x` value. `scale` replaces that with knots —
 `[[value, position], ...]` — for a broken axis, and `axis-break` draws the mark
 that says the axis is broken. `sync` gives two charts one crosshair, which is

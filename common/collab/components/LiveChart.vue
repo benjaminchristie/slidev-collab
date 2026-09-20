@@ -26,10 +26,11 @@
 
   `reveal` is how many series to show, so `$clicks + 1` walks the curves onto
   the slide one at a time and the story can be told in the order the work
-  happened. Curves draw themselves in with `pathLength="1"`, an SVG attribute
-  that renormalises a path to unit length — so the dash animation needs no
-  measurement of the real geometry and works the same on a curve of nine points
-  and one of nine hundred.
+  happened. A series draws itself in by sweeping a clip from the left edge of
+  the plot, so its cloud is revealed piece by piece alongside its mean rather
+  than appearing whole, and a dashed baseline draws in like every other line.
+  The sweep runs in x, which for a time series is the order the data arrived
+  in, and it costs no measurement of the real geometry.
 
   Points sit at their real x value. `scale` overrides that with knots —
   `[[value, position], ...]` — which is how a broken axis (linear to 64, then
@@ -63,6 +64,21 @@
           <stop offset="0%" :style="{ stopColor: visible[0]?.color }" stop-opacity="0.22" />
           <stop offset="100%" :style="{ stopColor: visible[0]?.color }" stop-opacity="0" />
         </linearGradient>
+
+        <!-- The draw-in. One rectangle per series, scaled out from the left
+             edge of the plot, clipping that series' line and cloud. Because
+             both are clipped by the same sweep, the cloud arrives with the
+             mean rather than all at once — and the cloud's own sweep is a
+             few tens of milliseconds quicker, so it stays just ahead of the
+             line it belongs to, the way it would if you drew it by hand. -->
+        <template v-for="(s, i) in drawable" :key="`sweep-${s.name}`">
+          <clipPath :id="`${uid}-line-${i}`">
+            <rect :x="pad.l" y="0" :width="W - pad.l - pad.r" :height="H" :style="sweep(i)" />
+          </clipPath>
+          <clipPath :id="`${uid}-cloud-${i}`">
+            <rect :x="pad.l" y="0" :width="W - pad.l - pad.r" :height="H" :style="sweep(i, LEAD_MS)" />
+          </clipPath>
+        </template>
       </defs>
 
       <!-- Horizontal grid, and the y scale it belongs to. -->
@@ -121,7 +137,8 @@
         :key="`band-${s.name}`"
         class="collab-chart-band"
         :d="s.bandPath"
-        :style="{ fill: s.color, ...drawStyle(i, true) }"
+        :clip-path="`url(#${uid}-cloud-${i})`"
+        :style="{ fill: s.color }"
       />
 
       <!-- The gradient fill is for decks with a single unbanded curve; a chart
@@ -131,7 +148,7 @@
         class="collab-chart-area"
         :d="drawable[0].areaPath"
         :fill="`url(#${uid}-area)`"
-        :style="drawStyle(0, true)"
+        :clip-path="`url(#${uid}-cloud-0)`"
       />
 
       <path
@@ -139,9 +156,9 @@
         :key="`line-${s.name}`"
         class="collab-chart-line"
         :d="s.linePath"
-        :stroke-dasharray="s.dashed ? '6 5' : '1'"
-        :pathLength="s.dashed ? null : 1"
-        :style="{ stroke: s.color, ...drawStyle(i, s.dashed) }"
+        :stroke-dasharray="s.dashed ? '6 5' : null"
+        :clip-path="`url(#${uid}-line-${i})`"
+        :style="{ stroke: s.color }"
       />
 
       <!-- Crosshair. The x value is read out here rather than in the legend
@@ -710,27 +727,30 @@ const crosshairLabelX = computed(() => {
 })
 
 /*
-  The draw-in. A solid line renormalised with pathLength="1" is revealed by
-  animating stroke-dashoffset from 1 to 0; anything that already carries a dash
-  pattern — the baselines, and every cloud — fades in instead, because the two
-  cannot share the dasharray. Series are staggered so a click that reveals two
-  of them still reads as two things.
+  The draw-in, as a clipping rectangle scaled out from the left edge of the
+  plot. Sweeping geometry rather than animating each mark has three things
+  going for it: a series' cloud and its mean are revealed by the same motion
+  so they cannot drift apart, a dashed baseline draws itself in like every
+  other line instead of having to fade (a dash pattern and an animated one
+  cannot share the same dasharray), and the reveal runs in x, which for a
+  time series is the order the data actually arrived in.
+
+  Series are staggered so that a click revealing two of them still reads as
+  two things.
 */
-function drawStyle(i, fadeOnly) {
+const DRAW_MS = 900
+const STAGGER_MS = 140
+const LEAD_MS = 70
+
+function sweep(i, lead = 0) {
   if (!props.animate) return {}
-  const delay = `${i * 140}ms`
-  if (fadeOnly) return { animation: `collab-chart-fade 500ms ease ${delay} both` }
   return {
-    strokeDashoffset: 0,
-    animation: `collab-chart-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) ${delay} both`,
+    transformOrigin: `${pad.value.l}px 0`,
+    animation: `collab-chart-sweep ${DRAW_MS - lead}ms` +
+      ` cubic-bezier(0.22, 1, 0.36, 1) ${i * STAGGER_MS}ms both`,
   }
 }
 
-/*
-  Every reading carries a spread, including the baselines that have none: a
-  constant is a value with zero spread, and printing it that way keeps the
-  readings a column of the same shape instead of a ragged list.
-*/
 function readout(s, i) {
   const half = s.hasBand ? (s.band[1][i] - s.band[0][i]) / 2 : 0
   return `${fmt(s.data[i])} ± ${fmt(half)}${props.unit}`
@@ -873,20 +893,17 @@ function onMove(event) {
 
 <style>
 /* Keyframes cannot live in a scoped block and still be referenced from an
-   inline style binding, so these two are global — and prefixed accordingly. */
-@keyframes collab-chart-draw {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
+   inline style binding, so this one is global — and prefixed accordingly.
+   It scales a clipping rectangle, and the rectangle's transform-origin is
+   set inline, because only the component knows where the plot starts. */
+@keyframes collab-chart-sweep {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
-@keyframes collab-chart-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
+/* No animation means no clip: the rectangle keeps its untransformed size and
+   every series is simply there. */
 @media (prefers-reduced-motion: reduce) {
-  .collab-chart-line,
-  .collab-chart-band,
-  .collab-chart-area { animation: none !important; }
+  .collab-chart clipPath rect { animation: none !important; }
 }
 </style>
