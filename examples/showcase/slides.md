@@ -657,9 +657,9 @@ transition: slide-left
 <FigureCaption src="/assets/example.png" caption="The figure this slide is about." />
 </div>
 
-<div v-drag="[538,280,320,96]" class="sc-callout"><strong>Double-click this box</strong> to put it into edit mode — a frame with handles appears. Then drag it, resize it, or rotate it, and click away when you are done. Single-clicking does nothing, which is the whole trick people miss.</div>
+<div v-drag="[551,243,320,96]" class="sc-callout"><strong>Double-click this box</strong> to put it into edit mode — a frame with handles appears. Then drag it, resize it, or rotate it, and click away when you are done. Single-clicking does nothing, which is the whole trick people miss.</div>
 
-<v-drag pos="587,120,320,86">
+<v-drag pos="560,133,320,86">
 <div class="sc-callout"><strong>Same thing as a tag.</strong> The directive above and this component are two spellings of one feature; use whichever reads better where you are.</div>
 </v-drag>
 
