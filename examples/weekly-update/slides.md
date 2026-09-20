@@ -19,8 +19,9 @@ The last two slides explain how to drive Slidev; they are deletable too.
 
 New to Slidev: press `f` for fullscreen and `o` to see every slide at once. The
 rest of the keys are on the second-to-last slide. What you are reading now is a
-speaker note, which the audience never sees — open
-http://localhost:3030/presenter to read notes while you present.
+speaker note, which the audience never sees. ./present opens it for you in a
+second tab: http://localhost:3030/presenter, with the current slide, the next
+one, a timer, and these notes.
 -->
 
 ---
@@ -240,7 +241,8 @@ only bites on the slide where it matters.
 
 ## URLs and PDFs
 
-Served by `./present <deck>` at `localhost:3030`:
+Served by `./present <deck>` at `localhost:3030`, the first two opened for
+you:
 
 - `/` — the deck
 - `/presenter` — notes, timer, next slide; keep this one on your laptop

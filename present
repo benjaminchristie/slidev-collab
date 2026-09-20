@@ -5,7 +5,11 @@
 #   ./present my-talk
 #   ./present 2026-08-31          # a bare name, if one deck matches
 #   ./present meetings/2026-08-31
-#   ./present 2026-08-31 --port 3040
+#   ./present my-talk --no-open   # do not open browser tabs
+#
+# Two tabs open once the server answers: the deck and the presenter view. The
+# presenter tab is opened second, so it is the one in front — that is the one
+# you drive the talk from.
 #
 # The deck is required. There is no default: with seventeen decks in the repo,
 # silently serving one of them is a worse outcome than being told to name it.
@@ -57,5 +61,30 @@ if [ ! -f "$deck/slides.md" ]; then
   esac
 fi
 
-echo "serving $deck on http://localhost:3030"
+# Fixed in compose.slidev.yml, which publishes 3030 on the host.
+BASE_URL=http://localhost:3030
+
+# Our own flags are consumed here; everything else is passed on to compose.
+open_browser=1
+args=()
+for arg in "$@"; do
+  case $arg in
+    --no-open) open_browser=0 ;;
+    *) args+=("$arg") ;;
+  esac
+done
+set -- ${args+"${args[@]}"}
+
+echo "serving $deck"
+echo "  deck       $BASE_URL/"
+echo "  presenter  $BASE_URL/presenter"
+echo "  overview   $BASE_URL/overview"
+
+if [ "$open_browser" -eq 1 ]; then
+  # The server below runs in the foreground, so the browser has to be opened by
+  # something that is not this shell. Backgrounded now, it waits for the deck to
+  # answer and then opens both tabs; it gives up quietly if there is no browser.
+  tools/open-when-ready.sh "$BASE_URL" / /presenter &
+fi
+
 exec env PRESENTATION="$deck" docker compose -f "$COMPOSE_FILE" up "$@"

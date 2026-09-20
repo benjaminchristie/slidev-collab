@@ -17,7 +17,8 @@ with:
 New to Slidev: `f` is fullscreen, `o` shows every slide at once, `g` jumps to a
 slide number. The two slides at the end list the rest, along with the URLs this
 server answers on. What you are reading is a speaker note — the audience never
-sees it. Open http://localhost:3030/presenter to read notes while you talk.
+sees it. ./present opens http://localhost:3030/presenter for you in a second
+tab, which is where you read these while you talk.
 -->
 
 ---
@@ -278,7 +279,7 @@ transition: slide-up
 
 ## URLs and PDFs
 
-`./present talk` serves the deck at `localhost:3030`:
+`./present talk` serves the deck at `localhost:3030` and opens the first two:
 
 - `/` — the deck
 - `/presenter` — notes, timer and next slide; keep this on your laptop

@@ -8,7 +8,9 @@ git clone https://github.com/benjaminchristie/slidev-collab.git slides && cd sli
 ```
 
 That serves the example talk at <http://localhost:3030>, hot-reloading as you
-edit `examples/talk/slides.md`.
+edit `examples/talk/slides.md`. Once the server answers, two browser tabs open:
+the deck, and the presenter view behind it. `./present my-talk --no-open` skips
+them.
 
 ## Layout
 
@@ -20,6 +22,7 @@ common/weekly_collab/       weekly-update theme + starter template
 compose.slidev.yml          dev server + batch renderer
 present                     ./present <deck>
 tools/export-all.sh         renders every deck to PDF
+tools/open-when-ready.sh    waits for the server, then opens the browser
 ```
 
 A "deck" is any directory containing a `slides.md`. Images live in that same
@@ -49,7 +52,8 @@ While the deck is open in a browser:
 | `f`             | Fullscreen                                      |
 | `d`             | Dark mode                                       |
 
-`./present <deck>` answers on more than one URL at `localhost:3030`:
+`./present <deck>` answers on more than one URL at `localhost:3030`, and opens
+the first two for you:
 
 | URL           | What it is                                            |
 |---------------|-------------------------------------------------------|
@@ -58,6 +62,9 @@ While the deck is open in a browser:
 | `/overview`   | Every slide on one scrollable page                    |
 | `/notes-edit` | Every speaker note in the deck, editable in one place  |
 | `/export`     | Render a PDF from the browser                         |
+
+The presenter tab is opened second, so it is the one in front: that is the one
+you drive from, and the deck tab is the one you drag onto the projector.
 
 Speaker notes are HTML comments at the end of a slide; the audience never sees
 them. Both example decks carry notes explaining the deck as you page through it
