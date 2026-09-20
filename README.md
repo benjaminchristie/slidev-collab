@@ -3,7 +3,7 @@
 A ready-to-run [Slidev](https://sli.dev) setup for research talks and meetings.
 
 ```bash
-git clone <this-repo> slides && cd slides
+git clone https://github.com/benjaminchristie/slidev-collab.git slides && cd slides
 ./present talk
 ```
 
@@ -62,10 +62,6 @@ While the deck is open in a browser:
 Speaker notes are HTML comments at the end of a slide; the audience never sees
 them. Both example decks carry notes explaining the deck as you page through it
 in presenter mode.
-
-The dev server runs with `--remote` and no password, so anyone who can reach
-port 3030 can open `/presenter`. That is fine on your own machine and worth
-knowing on shared wifi.
 
 ## Checking every deck builds
 
