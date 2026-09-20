@@ -475,6 +475,63 @@ nine points and one of nine hundred, with nothing measured.
 
 ---
 layout: demo
+feature: "fetch() on a slide"
+syntax: "components/RunsFromFile.vue"
+clicks: 2
+transition: slide-left
+---
+
+## The Figure Is the Results File
+
+<div class="grid grid-cols-[1.35fr_1fr] gap-6 items-center">
+<div>
+
+<RunsFromFile
+  src="/runs.csv"
+  x-label="Hours of Interaction Data"
+  y-label="Success Rate (%)"
+  unit="%"
+  :min="10" :max="85"
+  :dashed="['oracle']"
+  :reveal="$clicks + 1"
+  :animate="$renderContext !== 'print'" />
+
+</div>
+<div>
+
+```text
+hours,ours,ours_sem,baseline,...
+0,21.4,3.1,19.8,2.9,74.0
+0.5,34.9,3.4,24.1,3.0,74.0
+1,46.2,3.0,29.6,3.3,74.0
+```
+
+<p class="sc-hint mt-2">A slide can <code>fetch</code>. This one reads <code>public/runs.csv</code> at render time and hands the columns to <code>&lt;LiveChart&gt;</code> — so re-running the experiment and overwriting one file updates the talk.</p>
+
+</div>
+</div>
+
+<!--
+The usual path is: run, plot, export a PNG, drag it into the slides, notice the
+axis is wrong, and go round again. Every loop is a chance for the number on the
+slide to stop matching the number in the paper.
+
+This is the same figure with the loop removed. `public/runs.csv` is whatever
+the training script writes; the component fetches it, parses it, and passes the
+columns straight to the theme's chart. A column called `ours_sem` becomes the
+band around `ours` — the convention is in the component's header comment.
+
+It works in the PDF export too, because the exporter drives a real browser
+against the dev server: the printed figure is read from the same file at print
+time.
+
+The parser is twenty lines and refuses to guess. That is deliberate. A CSV
+parser clever enough to infer types is a CSV parser that will one day quietly
+drop a column of results, and you will present it.
+-->
+
+---
+layout: demo
 feature: "Animated counters"
 syntax: "components/StatCard.vue"
 grid: true
@@ -645,6 +702,108 @@ longer than it looks and most of it is reusable.
 
 ---
 layout: demo
+feature: "Magic Move, for maths"
+syntax: "<MathMove :step=\"$clicks\">"
+clicks: 4
+transition: slide-left
+---
+
+## Where Did That Term Come From?
+
+<MathMove :step="$clicks" :animate="$renderContext !== 'print'" :min-height="140" size="1.3em">
+
+<div>
+
+$$ \log p(x) = \log \int p(x, z) \, dz $$
+
+</div>
+
+<div>
+
+$$ \log p(x) = \log \int q(z) \, \frac{p(x, z)}{q(z)} \, dz $$
+
+</div>
+
+<div>
+
+$$ \log p(x) = \log \mathbb{E}_{q(z)}\!\left[ \frac{p(x, z)}{q(z)} \right] $$
+
+</div>
+
+<div>
+
+$$ \log p(x) \ge \mathbb{E}_{q(z)}\!\left[ \log \frac{p(x, z)}{q(z)} \right] $$
+
+</div>
+
+<div>
+
+$$ \log p(x) \ge \mathbb{E}_{q(z)}\bigl[ \log p(x, z) \bigr] - \mathbb{E}_{q(z)}\bigl[ \log q(z) \bigr] $$
+
+</div>
+
+</MathMove>
+
+<div class="mm-caption h-[2.6rem] mt-3">
+
+<div class="mm-cap" :class="$clicks === 0 ? 'is-on' : ''">
+
+The evidence, which is the integral nobody can do.
+
+</div>
+
+<div class="mm-cap" :class="$clicks === 1 ? 'is-on' : ''">
+
+Multiply by one — $q(z)/q(z)$ — for any $q$ we can actually sample.
+
+</div>
+
+<div class="mm-cap" :class="$clicks === 2 ? 'is-on' : ''">
+
+Which is an expectation under $q$. Watch the ratio travel: it arrives whole.
+
+</div>
+
+<div class="mm-cap" :class="$clicks === 3 ? 'is-on' : ''">
+
+Jensen's inequality moves the $\log$ inside, and costs us the equals sign.
+
+</div>
+
+<div class="mm-cap" :class="$clicks === 4 ? 'is-on' : ''">
+
+The ELBO — and the ratio splits into the two terms we can actually estimate.
+
+</div>
+
+</div>
+
+<p class="sc-hint">Slidev ships <code>magic-move</code> for code and nothing for maths. <code>&lt;MathMove&gt;</code> is the same idea over KaTeX: matching runs of glyphs, one shared flight per run.</p>
+
+<!--
+Five steps of the ELBO, which is the derivation everybody has seen and nobody
+has watched. The claim the component makes is in step 2: `p(x,z)/q(z)` starts
+its life inside an integral and ends up inside an expectation, and it travels
+there as one object rather than as eleven characters going their own ways.
+
+That is the design rule, and it is the opposite of what you would write first.
+The obvious implementation matches glyph to glyph and moves each the shortest
+distance, which shatters every term — `p` finds a nearer `p`, the fraction bar
+finds a different bar, and the audience watches a snowstorm. Matching whole
+runs and letting them cross is worse by the metric and far better on the
+screen.
+
+Set `clicks:` in the frontmatter to one less than the number of children: the
+bare slide is step 0.
+
+Three classes come with the component for the shape this slide has — `.mm-lead`
+for a framing sentence that rises out of the way, `.mm-reveal` for a fade-in,
+and `.mm-caption`, the fixed-height box under the stage holding one `.mm-cap`
+per step so the commentary changes without the layout moving.
+-->
+
+---
+layout: demo
 feature: "Arrow & draggable elements"
 syntax: "double-click to move · <Arrow />"
 clicks: 1
@@ -757,6 +916,78 @@ Things to do with it in front of an audience:
 The surface is computed once per resize into an offscreen canvas and blitted
 each frame; only the trajectory is redrawn. That is what keeps a live demo from
 turning the projector's fans on halfway through your talk.
+-->
+
+---
+layout: demo
+feature: "3D, without a 3D library"
+syntax: "components/Landscape3D.vue"
+transition: slide-left
+---
+
+## The Same Surface, Standing Up
+
+<Landscape3D />
+
+<!--
+The previous slide drew Himmelblau's function as contours and asked which
+minimum a run would find. This one asks the question contours cannot answer:
+how high is the wall between them?
+
+No three.js, no WebGL, no shader. Three dimensions on a 2D canvas is four
+things, and only the last is subtle:
+
+  1. a mesh — the height sampled on a grid;
+  2. a rotation — yaw and pitch, six multiplies a vertex;
+  3. a projection — drop the depth coordinate;
+  4. an order — draw far things before near ones.
+
+Step 4 is the painter's algorithm and it is six lines. Every quad *and* every
+segment of the descent path goes into one list tagged with the depth of its
+centre; the list is sorted once per frame; then it is drawn. That is why the
+trajectory vanishes behind a ridge and comes back, instead of floating over the
+top of the figure like an annotation.
+
+Shading is one dot product against a fixed light. The colour ramp runs between
+two of the theme's own colours, so the figure belongs to the talk.
+
+Drag the surface while you are talking. A figure somebody in the third row can
+ask you to rotate is a different kind of object from a PNG.
+-->
+
+---
+layout: demo
+feature: "Fixed-step physics"
+syntax: "components/Chaos.vue · RK4"
+transition: slide-left
+---
+
+## Two Pendulums, One Millionth of a Radian Apart
+
+<Chaos />
+
+<!--
+The argument for this slide over a figure: a figure of two diverged
+trajectories proves nothing, because the audience never saw them agree. Here
+they watch the traces sit on top of each other, and then come apart. The claim
+is made by the waiting.
+
+Two things in the implementation are worth stealing.
+
+The integrator runs at a *fixed* 1/480s step, several steps per frame, rather
+than integrating whatever `dt` the browser handed over. A chaotic system fed a
+wobbling step size diverges because the integrator wobbled — which is a
+different phenomenon wearing the same costume. Four extra lines buy an honest
+demo.
+
+And it is RK4, not Euler. A double pendulum conserves energy; forward Euler
+does not, and a minute into the talk both arms would be whirling like a fan,
+which is a lie told at sixty frames a second.
+
+The sparkline on the right is the real quantity: log of the angular separation,
+which climbs in a straight line — that slope is the Lyapunov exponent — until
+it saturates at the size of the system. Turn the nudge down to 1e-9 and the
+straight line just starts lower and takes longer; it never gets shallower.
 -->
 
 ---
@@ -1001,6 +1232,73 @@ small `<Link>` back to it in the corner of each divider.
 
 ---
 layout: demo
+feature: "Timing a deck, and playing it"
+syntax: "dwell: · Shift+P · ./record"
+transition: slide-left
+---
+
+## A Deck That Presents Itself
+
+<div class="grid grid-cols-2 gap-6 mt-1">
+<div>
+
+**Press `Shift+P`.** The deck jumps to slide 1 and walks itself to the end, one
+step every `dwell:` seconds, with a clock in the corner. `Shift+P` again stops
+it.
+
+That is `<DeckPlayer />`, which the theme mounts in its own `global-top.vue` —
+so every deck has it already. This deck writes its own `global-top` for the
+progress rail up there, which *replaces* the theme's rather than adding to it,
+so it mounts the component itself. Check what the theme had in a layer before
+you take that layer.
+
+</div>
+<div>
+
+```yaml
+clicks: 6
+dwell: [3, 7, 5, 4, 6, 4, 7]
+```
+
+<p class="sc-hint mt-2">One number holds every step of the slide. A list holds them one at a time — entry 0 is the slide before any click — and repeats its last entry if the build runs on past the end.</p>
+
+</div>
+</div>
+
+<div class="sc-note mt-3">
+
+`./record <deck>` renders the whole thing to an `.mp4` by driving a real browser
+and recording the screen, holding each step for its `dwell:`. It runs in real
+time, so `./record <deck> --preview` walks it and reports the timing without
+recording, and `node tools/timeline.mjs <deck>` sums the dwells with no browser
+at all. The play button agrees with the last of those: it holds each step for
+exactly its dwell, where the recorder first waits for the step's animations to
+finish.
+
+</div>
+
+<!--
+Every animated slide in this deck is also a video, if you want it to be. The
+three tools are the same walk at three prices:
+
+    node tools/timeline.mjs showcase     instant, sums the dwells
+    Shift+P                              real time, no container, no file
+    ./record showcase --preview          real time, measures the settle too
+    ./record showcase                    real time, plus an encode, plus an mp4
+
+The gap between the second and the fourth is *settle*: the recorder waits for
+each step's transitions to drain before its dwell clock starts, so a slide with
+a build always records longer than the sum of its dwells. Which is the right
+behaviour — a chart that takes a second and a half to draw itself should not
+spend a quarter of its six seconds doing it off camera.
+
+A per-click `dwell:` list is the thing to reach for on a build where one step is
+a glance and another is an equation. It is the difference between a video that
+feels edited and one that feels metronomic.
+-->
+
+---
+layout: demo
 feature: "Dark mode"
 class: sc-cols-top
 syntax: "<LightOrDark> · press d"
@@ -1069,14 +1367,19 @@ transition: slide-left
 | A terminal that types itself | slide 11 &middot; `components/Terminal.vue` |
 | Edit and run code on stage | slide 12 &middot; `components/CodePlayground.vue` |
 | A chart with no chart library | slide 14 &middot; `common/collab/components/LiveChart.vue` |
-| Numbers that count up | slide 15 &middot; `components/StatCard.vue` |
-| A table you can re-sort live | slide 16 &middot; `components/SortableTable.vue` |
-| A diagram written as text | slide 18 &middot; a `mermaid` fence |
-| Boxed terms in an equation | slide 19 &middot; KaTeX plus `.kset-frame` |
-| Annotations you drag into place | slide 20 &middot; the drag directive, `<Arrow>` |
-| A simulation that actually runs | slides 22 and 23 |
-| Content only the presenter sees | slide 27 &middot; `<RenderWhen>` |
-| Slides kept in another file | slide 29 &middot; `src:` |
+| A figure read from your results file | slide 15 &middot; `components/RunsFromFile.vue` |
+| Numbers that count up | slide 16 &middot; `components/StatCard.vue` |
+| A table you can re-sort live | slide 17 &middot; `components/SortableTable.vue` |
+| A diagram written as text | slide 19 &middot; a `mermaid` fence |
+| Boxed terms in an equation | slide 20 &middot; KaTeX plus `.kset-frame` |
+| A derivation that animates | slide 21 &middot; `common/collab/components/MathMove.vue` |
+| Annotations you drag into place | slide 22 &middot; the drag directive, `<Arrow>` |
+| A simulation that actually runs | slides 24 and 25 |
+| A surface you can rotate | slide 26 &middot; `components/Landscape3D.vue` |
+| Physics integrated honestly | slide 27 &middot; `components/Chaos.vue` |
+| Content only the presenter sees | slide 31 &middot; `<RenderWhen>` |
+| Slides kept in another file | slide 33 &middot; `src:` |
+| Time a deck, and play it | slide 34 &middot; `dwell:`, Shift+P, `./record` |
 
 <!--
 Slide numbers rather than names, because `g` then a number is how you get

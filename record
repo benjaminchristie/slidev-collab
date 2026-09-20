@@ -35,6 +35,7 @@ fi
 
 if [ "${CHECK_ONLY:-0}" != "1" ] && [ $# -eq 0 ]; then
   echo "usage: ./record <deck> [--dwell 4] [--fps 30] [--width 1920] [--height 1080]" >&2
+  echo "       ./record <deck> --preview   # walk and time it, write no video" >&2
   echo "       ./record --check     # can this image decode .mp4 slides?" >&2
   echo "" >&2
   echo "available decks:" >&2
@@ -44,6 +45,16 @@ fi
 
 deck=""
 if [ "${CHECK_ONLY:-0}" != "1" ]; then
+  # The deck is positional and comes first. Without this, `./record --preview
+  # my-talk` takes "--preview" as the deck name and reports that no such deck
+  # exists, which sends you looking in the wrong place entirely.
+  case ${1:-} in
+    -*)
+      echo "the deck comes first: ./record <deck> [flags]" >&2
+      echo "  e.g. ./record my-talk --preview" >&2
+      exit 2
+      ;;
+  esac
   deck=${1%/}
   shift
 fi

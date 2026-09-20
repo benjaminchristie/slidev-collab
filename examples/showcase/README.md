@@ -4,10 +4,16 @@
 ./present showcase
 ```
 
-Thirty-four slides of what Slidev can do when a slide is allowed to be a web
+Thirty-nine slides of what Slidev can do when a slide is allowed to be a web
 page: click-driven animation, code that morphs and code that runs, live charts,
 a sortable results table, Mermaid, KaTeX, draggable annotations, a two-link arm
 solving inverse kinematics, and three optimisers arguing about a loss surface.
+
+The deep end of the deep end is the last four: a derivation whose terms fly from
+one line to the next, that same loss surface standing up in three dimensions
+with no 3D library under it, two double pendulums coming apart from a millionth
+of a radian, and a chart that reads your results file instead of a pasted
+array.
 
 Every slide names the feature it is demonstrating in the badge at the top
 right, so the deck doubles as an index: find the slide that looks like what you
@@ -30,13 +36,14 @@ to the theme, so a folder next to `slides.md` is the whole mechanism:
 examples/showcase/
 ├── slides.md
 ├── global-top.vue        progress rail, drawn above every slide
-├── components/           10 components, auto-imported by filename
+├── components/           13 components, auto-imported by filename
 ├── layouts/              4 layouts, usable as `layout:` in frontmatter
 ├── styles/               index.ts, which loads index.css
 ├── composables/          the shared animation-loop helper
 ├── snippets/             code pulled onto a slide by `<<<`
 ├── pages/appendix.md     slides pulled in by `src:`
-└── public/assets/        images, served from the deck root as `/assets/...`
+├── public/assets/        images, served from the deck root as `/assets/...`
+└── public/runs.csv       results, fetched by a slide at render time
 ```
 
 Two notes on that:
@@ -44,6 +51,11 @@ Two notes on that:
 - The theme ships `global-bottom.vue` for page numbers. A file of the same name
   here would **replace** it rather than add to it, which is why the progress
   rail uses `global-top.vue`.
+- The theme also ships a `global-top.vue`, holding `<DeckPlayer />` — so this
+  deck's own `global-top.vue` took the play button away the day it was written,
+  and has to mount the component itself to get it back. "Replaces rather than
+  adds" cuts both ways: before taking a global layer, check what the theme had
+  in it.
 - The deck's own styles are `styles/index.ts`, a one-line module that imports
   `styles/index.css`. The rules are kept as plain CSS so another deck can copy
   that one file; `index.ts` is the filename Slidev's directory layout names for
@@ -85,6 +97,15 @@ back.
 <OptimizerLab />
 <RobotArm />
 <CodePlayground />
+
+<Landscape3D />
+<Chaos />
+
+<RunsFromFile src="/runs.csv" :dashed="['oracle']" :reveal="$clicks + 1"
+              x-label="Hours of Interaction Data" unit="%" />
+
+<!-- MathMove and DeckPlayer live in the theme: common/collab/components -->
+<MathMove :step="$clicks" :animate="$renderContext !== 'print'">...</MathMove>
 
 <TiltCard eyebrow="01" title="Hot reload" accent="var(--sc-blue)">Body text.</TiltCard>
 
@@ -166,3 +187,11 @@ right under `prefers-reduced-motion` and in the PDF, where the loop never runs.
 If a component turns out to be useful in a third deck, it has earned a place in
 `common/collab/components/`, and then it belongs to every talk the lab gives.
 Two decks is a coincidence.
+
+`MathMove` and `DeckPlayer` went that way. Both were written for one video
+deck, both turned out to be about presenting rather than about that talk, and
+both now live in the theme — which is why the slides here that demonstrate them
+point at `common/collab/components/` rather than at this folder. The three
+heaviest components in this deck have not earned it: `Landscape3D`, `Chaos` and
+`OptimizerLab` are arguments about one specific thing, and a shared theme is
+not where an argument belongs.

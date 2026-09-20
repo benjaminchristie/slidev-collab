@@ -15,6 +15,7 @@ edit `examples/talk/slides.md`.
 ```
 examples/talk/              example deck using the formal theme
 examples/weekly-update/     example deck using the meeting theme
+examples/showcase/          the deep end: what a slide can do as a web page
 common/collab/              formal-talk theme
 common/weekly_collab/       weekly-update theme + starter template
 compose.slidev.yml          dev server + batch renderer
@@ -22,6 +23,7 @@ present                     ./present <deck>
 record                      ./record <deck>  -> build/<deck>.mp4
 tools/export-all.sh         renders every deck to PDF
 tools/record-video.sh       plays a deck and records it as video
+tools/timeline.mjs          how long a deck runs, without recording it
 ```
 
 A "deck" is any directory containing a `slides.md`.
@@ -57,7 +59,23 @@ animations, slide transitions and embedded video all survive into the file —
 which a slideshow assembled from stills would not. It runs in real time,
 waits for each step's animations to finish and then holds `--dwell` seconds on
 the settled slide, stopping when a keypress no longer changes anything. A
-slide can set its own hold in frontmatter with `dwell: 14`.
+slide can set its own hold in frontmatter with `dwell: 14`, or give its click
+steps different holds with a list — `dwell: [3, 7, 5, 4]`, entry 0 being the
+slide before any click, the last entry repeating if the build runs on past the
+end of the list.
+
+Three cheaper ways to answer "how long is it?", since a recording costs exactly
+as long as the video plus an encode:
+
+```bash
+node tools/timeline.mjs talk      # instant: sums the dwells, no browser
+./record talk --preview           # real time, no capture and no encode
+```
+
+and **`Shift+P` on the deck itself**, which plays it through at its own dwell
+times with a clock in the corner. That last one is `<DeckPlayer />`, mounted by
+the theme's `global-top.vue`; a deck that writes its own `global-top.vue`
+replaces the theme's and has to mount the component itself.
 
 Fonts come from your machine: `./record` mounts `~/.fonts` and
 `~/.local/share/fonts` read-only and reports any family the deck asks for that
@@ -77,7 +95,7 @@ There is no audio track. Record narration separately and mux it in with ffmpeg.
 
 ## The two themes
 
-**`common/collab`** — formal talks. Palatino, centred headings, layouts for section dividers (`split-bg`), full-bleed statements (`big-text`), and a `TwoColumn` component.
+**`common/collab`** — formal talks. Palatino, centred headings, layouts for section dividers (`split-bg`), full-bleed statements (`big-text`), and a `TwoColumn` component. Also `<LiveChart>` for figures that stay figures, `<MathMove>` for a derivation whose terms fly from one line to the next, and `<DeckPlayer>` for the play button above.
 
 **`common/weekly_collab`** — weekly updates. Same typeface and palette so the two read as one group, but content is **top-aligned rather than centred**, so a three-bullet slide and a twenty-bullet slide start at the same y and headings do not jump as you page through. Three levels of bullet nesting stay legible. Layouts: `cover`, `two-cols`, `figure`, `section`. Components:
 

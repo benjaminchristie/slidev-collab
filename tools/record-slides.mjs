@@ -25,6 +25,17 @@ const MAX_SETTLE = Number(process.env.MAX_SETTLE ?? 8) * 1000
 const MAX_STEPS = Number(process.env.MAX_STEPS ?? 600)
 const START = process.env.START_PAGE ?? '1'
 
+/*
+  Preview: walk the deck and time it, but record nothing.
+
+  The reason to want this is that a recording answers "how long is the video?"
+  only by taking that long and then spending a minute encoding. The walk is the
+  part that has to run in real time; the capture and the encode do not have to
+  happen at all. With this set the browser opens no video stream, the shell
+  skips ffmpeg, and what comes back is the timing.
+*/
+const PREVIEW = process.env.PREVIEW === '1'
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 /*
@@ -83,9 +94,16 @@ async function position(page) {
       // A slide may set its own hold in frontmatter. Read it the way the
       // theme's own global-bottom does, because the key it lives under has
       // moved between Slidev versions.
+      //
+      // `dwell:` is either one number for the whole slide or a list with one
+      // entry per click step — `dwell: [2, 6, 3, 8]` — because a build often
+      // has a step that needs a beat and a step that needs a breath. A list
+      // shorter than the build repeats its last entry, so `dwell: [2, 6]` is
+      // "glance at the first, then six seconds on everything after it".
       const meta = unref(nav.currentSlideRoute)?.meta
       const front = meta?.slide?.frontmatter ?? meta?.frontmatter ?? {}
-      const own = Number(front.dwell)
+      const list = Array.isArray(front.dwell) ? front.dwell : [front.dwell]
+      const own = Number(list[Math.min(c ?? 0, list.length - 1)])
       if (p !== undefined) {
         return {
           key: `nav:${p}:${c ?? 0}`,
@@ -173,7 +191,7 @@ async function main() {
   const context = await runner.browser.newContext({
     viewport: { width: WIDTH, height: HEIGHT },
     deviceScaleFactor: 1,
-    recordVideo: { dir: OUT_DIR, size: { width: WIDTH, height: HEIGHT } },
+    ...(PREVIEW ? {} : { recordVideo: { dir: OUT_DIR, size: { width: WIDTH, height: HEIGHT } } }),
   })
   const startedAt = Date.now()
   const page = await context.newPage()
@@ -197,25 +215,32 @@ async function main() {
   )
   const holdFor = (pos, fallback) => (pos.dwell ? pos.dwell * 1000 : fallback)
 
+  // Split out so a preview can say how much of the run was waiting for
+  // animations rather than holding a finished slide.
+  let settleMs = 0
+  let holdMs = 0
+
   report(0, last, holdFor(last, FIRST), true)
-  await settleAnimations(page)
+  settleMs += await settleAnimations(page)
+  holdMs += holdFor(last, FIRST)
   await sleep(holdFor(last, FIRST))
 
   for (; steps < MAX_STEPS; steps++) {
     await page.keyboard.press('Space')
-    await settleAnimations(page)
+    settleMs += await settleAnimations(page)
     let now = await position(page)
     if (now.key === last.key) {
       // One keypress changed nothing: the deck is over. Try once more in case
       // the press landed while the page was mid-navigation.
       await page.keyboard.press('Space')
-      await settleAnimations(page)
+      settleMs += await settleAnimations(page)
       now = await position(page)
       if (now.key === last.key) break
     }
     last = now
     const hold = holdFor(last, DWELL)
     report(steps + 1, last, hold)
+    holdMs += hold
     await sleep(hold)
   }
 
@@ -228,7 +253,16 @@ async function main() {
 
   const raw = video ? await video.path() : null
   process.stdout.write(
-    `${JSON.stringify({ raw, steps, readyOffset, engine: runner.engine })}\n`,
+    `${JSON.stringify({
+      raw,
+      steps,
+      readyOffset,
+      engine: runner.engine,
+      settleMs,
+      holdMs,
+      tailMs: TAIL,
+      wallMs: Date.now() - startedAt,
+    })}\n`,
   )
 }
 

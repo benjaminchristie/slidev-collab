@@ -77,6 +77,7 @@ while [ $# -gt 0 ]; do
     --max-steps) MAX_STEPS=$2; shift 2 ;;
     --max-settle) SETTLE_CAP=$2; shift 2 ;;
     --out) OUT=$2; shift 2 ;;
+    --preview) PREVIEW=1; shift ;;
     --check) CHECK=1; shift ;;
     --allow-chromium) ALLOW_CHROMIUM=1; shift ;;
     -*) echo "unknown flag: $1" >&2; exit 2 ;;
@@ -84,6 +85,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 export DWELL FIRST_DWELL WIDTH HEIGHT MAX_STEPS
+export PREVIEW=${PREVIEW:-0}
 export MAX_SETTLE=$SETTLE_CAP
 
 cd "$REPO" || { echo "cannot enter $REPO" >&2; exit 2; }
@@ -134,6 +136,7 @@ if [ -z "$deck" ]; then
   echo "usage: record <deck> [--dwell 4] [--fps 30] [--width 1920] [--height 1080]" >&2
   echo "       record --check       # can this image decode .mp4 slides?" >&2
   echo "" >&2
+  echo "  --preview          walk and time the deck, writing no video" >&2
   echo "  --allow-chromium   record without Chrome, accepting black .mp4 slides" >&2
   exit 2
 fi
@@ -141,11 +144,13 @@ if [ ! -f "$REPO/$deck/slides.md" ]; then
   echo "no such deck: $deck (no $deck/slides.md)" >&2
   exit 1
 fi
-command -v ffmpeg >/dev/null || {
-  echo "ffmpeg is not in this image — rebuild it:" >&2
-  echo "  docker compose -f compose.slidev.yml build export" >&2
-  exit 1
-}
+if [ "$PREVIEW" != "1" ]; then
+  command -v ffmpeg >/dev/null || {
+    echo "ffmpeg is not in this image — rebuild it:" >&2
+    echo "  docker compose -f compose.slidev.yml build export" >&2
+    exit 1
+  }
+fi
 
 # Chrome, before anything expensive happens.
 #
@@ -211,7 +216,7 @@ videos=$(grep -rhoiIE "[^\"' ]+\.(mp4|m4v|mov)" "$REPO/$deck" \
          sort -u | wc -l)
 
 if ! command -v google-chrome >/dev/null; then
-  if [ "$videos" -gt 0 ] && [ "${ALLOW_CHROMIUM:-0}" != "1" ]; then
+  if [ "$videos" -gt 0 ] && [ "${ALLOW_CHROMIUM:-0}" != "1" ] && [ "$PREVIEW" != "1" ]; then
     echo "" >&2
     echo "  Google Chrome is not in this image." >&2
     echo "" >&2
@@ -268,10 +273,17 @@ ln -sfn "$(npm root -g)" "$driver/node_modules"
 audit_fonts "$work"
 
 WALL_START=$SECONDS
-echo "recording $deck"
-echo "  ${WIDTH}x${HEIGHT} at ${FPS}fps, ${DWELL}s per step"
-echo "  starting the dev server; this runs in real time, so a long deck takes"
-echo "  about (steps x ${DWELL}s) plus a minute to encode"
+if [ "$PREVIEW" = "1" ]; then
+  echo "previewing $deck"
+  echo "  ${WIDTH}x${HEIGHT}, ${DWELL}s per step, no video written"
+  echo "  the walk itself is what takes the time, so this runs as long as the"
+  echo "  video would — it just skips the capture and the encode"
+else
+  echo "recording $deck"
+  echo "  ${WIDTH}x${HEIGHT} at ${FPS}fps, ${DWELL}s per step"
+  echo "  starting the dev server; this runs in real time, so a long deck takes"
+  echo "  about (steps x ${DWELL}s) plus a minute to encode"
+fi
 
 # Started without a subshell so that SERVER_PID is the server itself and the
 # trap can actually reach it, rather than a shell that has already forked.
@@ -294,6 +306,28 @@ if [ "$status" -ne 0 ] || [ -z "$result" ]; then
   tail -20 "$STAGE/server.log" | sed 's/^/    /' >&2
   cp "$STAGE/server.log" "$OUT/$name.record.error.log" 2>/dev/null
   exit 1
+fi
+
+num() { printf '%s' "$result" | sed -n "s/.*\"$1\":\\([0-9.]*\\).*/\\1/p"; }
+
+if [ "$PREVIEW" = "1" ]; then
+  steps=$(num steps); settle=$(num settleMs); hold=$(num holdMs)
+  tail_ms=$(num tailMs); wall=$(num wallMs); offset=$(num readyOffset)
+  secs() { awk -v ms="${1:-0}" 'BEGIN{printf "%.0f", ms/1000}'; }
+  clock() { awk -v s="${1:-0}" 'BEGIN{printf "%d:%02d", int(s/60), s%60}'; }
+  video=$(awk -v h="${hold:-0}" -v s="${settle:-0}" -v t="${tail_ms:-0}" \
+            'BEGIN{printf "%.0f", (h+s+t)/1000}')
+  echo ""
+  echo "  $((steps + 1)) step(s) walked"
+  echo "  holds          $(secs "$hold")s"
+  echo "  settle         $(secs "$settle")s   waiting for animations to finish"
+  echo "  tail           $(secs "$tail_ms")s"
+  echo "  ----------------------"
+  echo "  video would be $video s  $(clock "$video")"
+  echo ""
+  echo "  (the compile before the first slide, ${offset:-0}s, is trimmed out of a"
+  echo "   real recording, so it is not counted here)"
+  exit 0
 fi
 
 raw=$(printf '%s' "$result" | sed -n 's/.*"raw":"\([^"]*\)".*/\1/p')

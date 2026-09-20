@@ -69,6 +69,21 @@ The easy case was already solved <Cite n="1" />, the hard one was not <Cite n="2
   ['2026 Q1', 'Writing and defense', 'todo'],
 ]" />
 </div>
+
+<MathMove :step="$clicks" :animate="$renderContext !== 'print'" :min-height="180">
+<div>
+
+$$ I = H(d \mid b_0) - H(d \mid \mathcal{A}, b_0) $$
+
+</div>
+<div>
+
+$$ I = \log\bigl(1 + \alpha_d H(b_0)\bigr) $$
+
+</div>
+</MathMove>
+
+<DeckPlayer />
 ```
 
 A component tag written across several lines is not a complete tag on its own
@@ -147,3 +162,63 @@ nobody reads a Gantt chart on a slide.
 slides. It uses this theme's palette, which needed two ink colours the talk
 theme did not have: `--color-green-deep` and `--color-red`, both matching the
 weekly theme so that a status means one colour across both decks.
+
+`<MathMove>` is magic-move for maths. Slidev ships the effect for code — two
+fenced blocks, and the tokens common to both slide from one to the other — and
+there is no equivalent for KaTeX, which is a shame, because a derivation is
+exactly where the audience's question at every line is *where did that term
+come from?* Give it one direct child per step, each holding one or more
+`$$…$$` blocks, drive `step` from `$clicks`, and declare `clicks:` in the
+slide's frontmatter.
+
+The rule it matches by is **keep terms together, even when that costs travel**.
+Glyphs are paired in runs — the longest stretch that reads the same in both
+steps first, ties going to the shortest journey — and every glyph in a run
+flies with one shared offset, so `1 + \alpha_d H(b_0)` leaves the inside of a
+`\log` and lands whole on a fraction bar instead of shattering into nine
+drifting characters. Runs are allowed to cross each other; reading order is
+not preserved, because what the animation is for is showing where a term went.
+Only glyphs in no run fade.
+
+The stage is as tall as its tallest step and stays that way, so the maths never
+changes size between steps and nothing around it moves. `size` (1.5em) sets
+that size and `gap` the space between the lines of one step; a slide with
+`<MathMove>` on it also gets a tighter heading margin, because vertical space
+on a derivation slide is the scarce thing.
+
+Three optional classes come with it for the shape a derivation slide tends to
+want: `.mm-lead`, a framing sentence that starts centred and rises above the
+equations when the build begins (add `is-up`, and set `--mm-lead-drop` to how
+far it should start down the slide); `.mm-reveal`, which fades its contents in
+with `is-on`; and `.mm-caption`, a fixed-height box holding one `.mm-cap` per
+step, of which the one with `is-on` shows — so the commentary under the maths
+can change without the layout moving.
+
+`<DeckPlayer>` plays the deck. Press **Shift+P** and it jumps to slide 1 and
+walks the whole thing at its own `dwell:` times with a clock in the corner;
+Shift+P again stops it. The theme's `global-top.vue` mounts it, so every deck
+has it already — but a deck that writes its own `global-top.vue` *replaces* the
+theme's, and has to mount `<DeckPlayer />` in it to keep the play button.
+
+It exists because `./record <deck>` answers "how long is this video?" only by
+taking that long and then encoding it. This is the same walk with no container
+and no file. It holds each step for exactly its dwell, where the recorder first
+waits for the step's animations to drain — so the clock here matches
+`node tools/timeline.mjs`, and the recorded file comes out longer by roughly
+that settle time.
+
+`dwell:` is either one number for the whole slide or a list with one entry per
+click step:
+
+```yaml
+---
+clicks: 6
+dwell: [3, 7, 5, 4, 6, 4, 7]   # the bare slide, then the six clicks
+---
+```
+
+A list shorter than the build repeats its last entry, so `dwell: [2, 8]` reads
+as "a glance at the bare slide, then eight seconds on everything after". An
+entry that is not a positive number falls back to the run default, which is how
+to leave one step alone. `./record`, `./record --preview`, `timeline.mjs` and
+the play button all read it the same way.

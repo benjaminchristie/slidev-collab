@@ -17,8 +17,17 @@
   context is the same choice the theme makes in its own `global-bottom.vue`:
   the import path has moved between Slidev versions, the template global has
   not.
+
+  There is a catch, and it is why `<DeckPlayer />` appears below. The theme
+  ships a `global-top.vue` of its own, holding the deck player — and "replaces
+  rather than adds" cuts both ways, so this file silently took the play button
+  away the day it was written. Mounting the component here puts it back. A deck
+  that writes any global layer should check what the theme had in that layer
+  first.
 -->
 <template>
+  <DeckPlayer />
+
   <div class="sc-rail">
     <div class="sc-rail__fill" :style="{ width: fraction($slidev) }" />
     <div class="sc-rail__ticks">
@@ -28,6 +37,12 @@
 </template>
 
 <script setup>
+// By path, not by auto-import: components resolve by convention inside slides,
+// and a global layer is not a slide. `./common` rather than `../../common`
+// because `./present` bind-mounts the theme folder *into* the deck folder at
+// run time, which is the same path the frontmatter's `theme:` key names.
+import DeckPlayer from './common/collab/components/DeckPlayer.vue'
+
 function total(slidev) {
   // `nav.total` counts the slides the deck navigates through, which is what a
   // progress bar should measure. Falls back to 1 so the first render of an
