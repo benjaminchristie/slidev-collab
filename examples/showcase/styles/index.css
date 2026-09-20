@@ -1,0 +1,671 @@
+/*
+  The showcase deck's own stylesheet.
+
+  Slidev loads `styles/index.css` from the deck folder after the theme's own
+  styles, so everything here lands on top of `common/collab/styles/index.css`
+  without touching it. That is the point of this file: a deck can extend the
+  lab theme as far as it likes and still be the only thing that changes.
+
+  Anything the theme declares with `!important` has to be answered with
+  `!important` here — the theme pins the slide background, list markers and
+  heading sizes that way, and a showcase slide that wants a dark full-bleed
+  canvas has to say so louder than the theme did.
+
+  Everything is namespaced `sc-` (showcase) so that copying one of these rules
+  into another deck cannot collide with the theme's own class names.
+*/
+
+:root {
+  /* The Collab palette, extended with the two values a dark slide needs. The
+     theme's orange (#cc7000) is chosen for contrast on white and goes muddy on
+     a dark panel, so `--sc-orange-lit` is the same hue lifted for dark
+     backgrounds. Both are used; neither replaces the other. */
+  --sc-orange: var(--color-emphasis);
+  --sc-orange-lit: #f0a12e;
+  --sc-blue: var(--color-blue);
+  --sc-blue-lit: #5bb8e0;
+  --sc-purple: var(--color-purple);
+  --sc-green: var(--color-green-deep);
+  --sc-red: var(--color-red);
+
+  --sc-ink: #14161a;
+  --sc-ink-2: #3f454e;
+  --sc-line: rgba(20, 22, 26, 0.10);
+  --sc-line-strong: rgba(20, 22, 26, 0.22);
+  --sc-paper: #fbfbfc;
+
+  /* The dark surface used by the hero and the chapter dividers. Slate rather
+     than black: pure black next to Palatino reads as a printing error. */
+  --sc-night: #12151b;
+  --sc-night-2: #1c2230;
+
+  --sc-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ------------------------------------------------------------------ *
+ * 1. LAYOUT HELPERS
+ * ------------------------------------------------------------------ */
+
+/* A full-bleed slide: no padding at all, so a canvas can run to the edges. */
+.slidev-layout.sc-bleed {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.slidev-layout.sc-dark {
+  background: radial-gradient(120% 120% at 15% 0%, var(--sc-night-2) 0%, var(--sc-night) 55%) !important;
+  color: #c9d1de;
+}
+.slidev-layout.sc-dark h1,
+.slidev-layout.sc-dark h2,
+.slidev-layout.sc-dark h3 {
+  color: #f4f6fa;
+}
+.slidev-layout.sc-dark p,
+.slidev-layout.sc-dark li,
+.slidev-layout.sc-dark td {
+  color: #b9c2d0;
+}
+.slidev-layout.sc-dark strong {
+  color: #f4f6fa;
+}
+.slidev-layout.sc-dark code {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--sc-orange-lit) !important;
+}
+
+/* A faint dot grid, faded out towards the edges so it never competes with the
+   content sitting on it. Drawn on a pseudo-element rather than as a background
+   on the slide itself, because the slide's background is what the theme pins
+   to white and this has to survive that. */
+.slidev-layout.sc-grid {
+  position: relative;
+  /* `isolation` keeps the negative z-index below from escaping behind the
+     slide itself. Without it the grid would be painted under the white
+     background and never seen. */
+  isolation: isolate;
+}
+.slidev-layout.sc-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(20, 22, 26, 0.13) 1px, transparent 0);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 20%, transparent 100%);
+  pointer-events: none;
+  /* Negative, so in-flow content paints over it without every child of the
+     slide having to be given `position: relative` — which would break the
+     absolutely-positioned feature badge in the demo layout. */
+  z-index: -1;
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. TYPE ACCENTS
+ * ------------------------------------------------------------------ */
+
+/* Gradient text. `background-clip: text` needs a painted background and a
+   transparent fill; the -webkit- prefix is still required in Chromium. */
+.sc-gradient {
+  background: linear-gradient(100deg, var(--sc-orange) 0%, #d2568c 45%, var(--sc-purple) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+.sc-dark .sc-gradient {
+  background: linear-gradient(100deg, var(--sc-orange-lit) 0%, #ef7fae 45%, #b491f0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. CARDS AND GRIDS
+ * ------------------------------------------------------------------ */
+
+.sc-card {
+  position: relative;
+  border: 1px solid var(--sc-line);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0.9rem 1.1rem;
+  box-shadow: 0 14px 34px -22px rgba(20, 22, 26, 0.45);
+}
+.sc-dark .sc-card {
+  border-color: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: none;
+}
+
+/* Paragraphs inside a card keep the theme's 1.25rem bottom margin otherwise,
+   which is a lot of air inside a 90px box. */
+.sc-card p {
+  margin: 0 !important;
+}
+
+.sc-card__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sc-ink);
+  margin-bottom: 0.2rem;
+}
+.sc-dark .sc-card__title { color: #f4f6fa; }
+
+.sc-card__body {
+  font-size: 0.86rem !important;
+  line-height: 1.5;
+  color: var(--sc-ink-2);
+}
+.sc-dark .sc-card__body { color: #aab4c4; }
+
+.sc-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+.sc-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; }
+.sc-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.7rem; }
+
+.sc-hint {
+  font-size: 0.72rem !important;
+  font-style: italic;
+  line-height: 1.4 !important;
+  color: var(--color-light-gray);
+  margin: 0.45rem 0 0 !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * 4. THE INDEX CARDS ON SLIDE 2
+ * ------------------------------------------------------------------ */
+
+.sc-index {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+/* `<Link>` renders an anchor. Targeting the grid items themselves rather than
+   `a` specifically keeps this working whatever Slidev wraps the slot in. */
+.sc-index > * {
+  display: block;
+  text-decoration: none !important;
+  color: inherit !important;
+  cursor: pointer;
+}
+
+.sc-index__card {
+  height: 100%;
+  border: 1px solid var(--sc-line);
+  border-radius: 12px;
+  padding: 0.5rem 0.65rem 0.55rem;
+  background: #fff;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.sc-index__card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--sc-orange) 45%, transparent);
+  box-shadow: 0 16px 30px -20px rgba(204, 112, 0, 0.7);
+}
+
+/* Sized to fit six of these plus a heading and a footnote inside the slide.
+   Two rows of cards is the budget; anything larger runs off the bottom. */
+.sc-index__n {
+  font-family: var(--sc-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  color: var(--sc-orange);
+}
+
+.sc-index__t {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--sc-ink);
+  margin-top: 0.05rem;
+}
+
+.sc-index__d {
+  font-size: 0.66rem;
+  line-height: 1.35;
+  color: var(--color-dark-gray);
+  margin-top: 0.15rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * 5. CLICK-DRIVEN ANIMATION HELPERS
+ * ------------------------------------------------------------------ */
+
+/* Slidev's built-in v-click fade is ~100ms, which pops. These three give a
+   reveal something closer to a motion design, and they are plain classes, so
+   they compose with `v-click`, `v-after` and `v-clicks` alike. */
+.sc-rise.slidev-vclick-target {
+  transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.42s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.sc-rise.slidev-vclick-hidden {
+  transform: translateY(14px);
+}
+
+.sc-zoom.slidev-vclick-target {
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.sc-zoom.slidev-vclick-hidden {
+  transform: scale(0.94);
+}
+
+/* Staggering: a grid of cards revealed on one click looks mechanical when all
+   of them move together. `--i` is set inline in the markdown. */
+.sc-stagger.slidev-vclick-target {
+  transition-delay: calc(var(--i, 0) * 70ms) !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * 6. A CUSTOM SLIDE TRANSITION
+ * ------------------------------------------------------------------ *
+ *
+ * `transition: sc-wipe` in a slide's frontmatter makes Slidev wrap the slide
+ * in a Vue <Transition name="sc-wipe">, which looks for exactly these class
+ * names. Nothing has to be registered anywhere: define the six classes and
+ * the name is usable.
+ *
+ * Both slides are absolutely positioned on top of each other while the
+ * transition runs, so the outgoing one must not be allowed to sit above the
+ * incoming one — hence the z-index pair.
+ */
+.sc-wipe-enter-active,
+.sc-wipe-leave-active {
+  transition: clip-path 0.55s cubic-bezier(0.65, 0, 0.35, 1),
+              opacity 0.55s ease,
+              transform 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.sc-wipe-enter-active { z-index: 2; }
+.sc-wipe-leave-active { z-index: 1; }
+
+.sc-wipe-enter-from {
+  clip-path: inset(0 0 0 100%);
+  transform: scale(1.03);
+}
+.sc-wipe-enter-to,
+.sc-wipe-leave-from {
+  clip-path: inset(0 0 0 0);
+  transform: scale(1);
+}
+.sc-wipe-leave-to {
+  opacity: 0.35;
+  transform: scale(0.97);
+}
+
+/* Going backwards, the wipe should come from the other side. Slidev looks for
+   `<name>-backward` when you navigate back and falls back to no transition at
+   all if it is missing, so this pair is what stops the deck from snapping on
+   the way back through a chapter divider. */
+.sc-wipe-backward-enter-active,
+.sc-wipe-backward-leave-active {
+  transition: clip-path 0.55s cubic-bezier(0.65, 0, 0.35, 1),
+              opacity 0.55s ease,
+              transform 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.sc-wipe-backward-enter-active { z-index: 2; }
+.sc-wipe-backward-leave-active { z-index: 1; }
+
+.sc-wipe-backward-enter-from {
+  clip-path: inset(0 100% 0 0);
+  transform: scale(1.03);
+}
+.sc-wipe-backward-enter-to,
+.sc-wipe-backward-leave-from {
+  clip-path: inset(0 0 0 0);
+  transform: scale(1);
+}
+.sc-wipe-backward-leave-to {
+  opacity: 0.35;
+  transform: scale(0.97);
+}
+
+/* ------------------------------------------------------------------ *
+ * 7. THE PROGRESS RAIL (global-top.vue)
+ * ------------------------------------------------------------------ */
+
+.sc-rail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 200;
+  pointer-events: none;
+  background: rgba(20, 22, 26, 0.07);
+}
+
+.sc-rail__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sc-orange), #d2568c 60%, var(--sc-purple));
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sc-rail__ticks {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.sc-rail__tick {
+  flex: 1 1 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.55);
+}
+.sc-rail__tick:last-child { border-right: 0; }
+
+/* ------------------------------------------------------------------ *
+ * 8. SHIKI CODE BLOCKS
+ * ------------------------------------------------------------------ *
+ *
+ * The theme leaves fenced blocks alone. A showcase deck puts a lot of code on
+ * screen, so it is worth the frame and the tighter type.
+ */
+.slidev-layout .slidev-code-wrapper,
+.slidev-layout .shiki-magic-move-container {
+  border: 1px solid var(--sc-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f7f8fa;
+}
+
+.slidev-layout pre.slidev-code {
+  margin: 0 !important;
+  padding: 0.85rem 1rem !important;
+  font-size: 0.78rem !important;
+  line-height: 1.55 !important;
+  background: transparent !important;
+}
+
+/* Slidev dims the lines that are not highlighted by a `{1|2-4}` range. The
+   default dim is subtle enough to be invisible from the back of a room. */
+.slidev-layout .slidev-code .line.dimmed {
+  opacity: 0.32 !important;
+  filter: grayscale(0.55);
+}
+
+/* ------------------------------------------------------------------ *
+ * 9. MERMAID
+ * ------------------------------------------------------------------ */
+
+.slidev-layout .mermaid {
+  display: flex;
+  justify-content: center;
+}
+.slidev-layout .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+/* Mermaid labels inherit Palatino from the theme's blanket font rule, which
+   makes a flowchart look like body copy. Diagram text is metadata. */
+.slidev-layout .mermaid .nodeLabel,
+.slidev-layout .mermaid .edgeLabel,
+.slidev-layout .mermaid .cluster-label {
+  font-family: var(--sc-mono) !important;
+  font-size: 0.78rem !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * 10. DRAGGABLE ANNOTATIONS
+ * ------------------------------------------------------------------ */
+
+.sc-callout {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--sc-orange) 40%, transparent);
+  background: color-mix(in srgb, var(--sc-orange) 9%, white);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--sc-ink-2);
+  box-shadow: 0 10px 24px -18px rgba(20, 22, 26, 0.7);
+}
+.sc-callout strong { color: var(--sc-orange); }
+
+/* The same box, in the deck's blue, for an annotation that is *not* draggable
+   — so the slide does not imply that every callout can be moved. */
+.sc-callout--plain {
+  border-color: color-mix(in srgb, var(--sc-blue) 38%, transparent);
+  background: color-mix(in srgb, var(--sc-blue) 8%, white);
+}
+.sc-callout--plain strong { color: var(--sc-blue); }
+
+/* ------------------------------------------------------------------ *
+ * 11. FORM CONTROLS INSIDE DEMOS
+ * ------------------------------------------------------------------ *
+ *
+ * Shared by the optimiser playground, the arm and the playground editor, so
+ * that three unrelated components still look like one deck. Range inputs
+ * cannot be styled from a scoped block without `:deep()` gymnastics in every
+ * component, which is the other reason these live here.
+ */
+.sc-ctl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sc-mono);
+  font-size: 0.68rem;
+  color: var(--sc-ink-2);
+}
+
+.sc-ctl label {
+  min-width: 3.3rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  color: var(--color-dark-gray);
+}
+
+.sc-ctl output {
+  min-width: 2.7rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--sc-orange);
+  font-weight: 700;
+}
+
+input[type="range"].sc-range {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1 1 auto;
+  /* A form control's intrinsic width is its automatic minimum, so without this
+     a slider refuses to shrink and pushes its row out of a narrow panel. */
+  min-width: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--sc-line-strong);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"].sc-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--sc-orange);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(20, 22, 26, 0.35);
+}
+input[type="range"].sc-range::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--sc-orange);
+}
+
+.sc-btn {
+  font-family: var(--sc-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--sc-line-strong);
+  background: #fff;
+  color: var(--sc-ink-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.sc-btn:hover {
+  border-color: var(--sc-orange);
+  color: var(--sc-orange);
+}
+.sc-btn--primary {
+  border-color: var(--sc-orange);
+  background: var(--sc-orange);
+  color: #fff;
+}
+.sc-btn--primary:hover {
+  background: #b56300;
+  border-color: #b56300;
+  color: #fff;
+}
+.sc-btn--on {
+  border-color: var(--sc-blue);
+  background: color-mix(in srgb, var(--sc-blue) 12%, white);
+  color: var(--sc-blue);
+}
+
+/* ------------------------------------------------------------------ *
+ * 12. PRESENTER / PRINT NOTES
+ * ------------------------------------------------------------------ */
+
+.sc-note {
+  border-left: 3px solid var(--sc-blue);
+  background: color-mix(in srgb, var(--sc-blue) 7%, white);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.8rem !important;
+  line-height: 1.45;
+  color: var(--sc-ink-2);
+}
+.sc-note p { margin: 0 !important; }
+
+/* ------------------------------------------------------------------ *
+ * 13. ODDS AND ENDS USED BY SINGLE SLIDES
+ * ------------------------------------------------------------------ *
+ *
+ * Small enough not to deserve a component, shared by enough slides not to
+ * belong in one. Anything here that turns out to be used by a second deck is a
+ * candidate for `common/collab/styles/index.css` instead.
+ */
+
+.sc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+/* The click-counter dial. One SVG circle with an animated dash offset; the
+   numeral is an SVG <text>, which is why it needs its own font rule — the
+   theme's blanket Palatino selector does not reach inside an <svg>. */
+.sc-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sc-ring svg {
+  width: 9.5rem;
+  height: 9.5rem;
+}
+.sc-ring__num {
+  font-family: var(--sc-mono);
+  font-size: 32px;
+  font-weight: 700;
+  fill: var(--sc-ink);
+}
+.sc-ring__label {
+  font-family: var(--sc-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--color-dark-gray);
+}
+
+.sc-index--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* The theme pins every two-column grid to `align-items: center`, which is
+   right when the two halves are about the same height and wrong when one is a
+   code block and the other is a paragraph. Opt out per slide with
+   `class: sc-cols-top` in the frontmatter. */
+.slidev-layout.sc-cols-top .collab-two-col { align-items: start !important; }
+
+/* <Toc> renders an ordered list of links. The theme's list styling is built
+   for body copy and makes a contents list twice the height it needs. */
+.slidev-layout .sc-toc ol {
+  list-style-type: decimal !important;
+  padding-left: 1.3rem !important;
+  margin: 0 !important;
+}
+.slidev-layout .sc-toc li {
+  font-size: 0.85rem !important;
+  line-height: 1.35 !important;
+  margin-bottom: 0.5rem !important;
+  color: var(--color-dark-gray);
+}
+.slidev-layout .sc-toc li::marker { color: var(--color-light-gray); }
+.slidev-layout .sc-toc a {
+  color: inherit !important;
+  text-decoration: none !important;
+  border-bottom: 1px solid transparent;
+}
+.slidev-layout .sc-toc a:hover { color: var(--sc-orange) !important; }
+.slidev-layout .sc-toc .active > a,
+.slidev-layout .sc-toc .active-parent > a {
+  color: var(--sc-orange) !important;
+  font-weight: 700;
+}
+
+/* Markdown tables. Nothing in the Collab theme styles them, because neither of
+   the other two example decks has one — and an unstyled <table> under a CSS
+   reset is a grid of naked text. */
+.slidev-layout table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.6rem 0;
+}
+.slidev-layout thead th {
+  text-align: left;
+  font-family: var(--sc-mono) !important;
+  font-size: 0.6rem !important;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-dark-gray);
+  padding: 0 0.5rem 0.35rem;
+  border-bottom: 1px solid var(--sc-line-strong);
+}
+.slidev-layout tbody td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--sc-line);
+  vertical-align: top;
+}
+
+/* The index-of-everything slide: seventeen rows have to fit on one slide, so
+   this trades the body scale for the row count. */
+.slidev-layout.sc-cheat table { margin-top: 0.2rem; }
+.slidev-layout.sc-cheat tbody td {
+  font-size: 0.74rem !important;
+  line-height: 1.3 !important;
+  padding: 0.17rem 0.5rem !important;
+}
+.slidev-layout.sc-cheat tbody td:first-child { width: 42%; color: var(--sc-ink); }
+.slidev-layout.sc-cheat tbody td:last-child { color: var(--color-dark-gray); }
+.slidev-layout.sc-cheat code { font-size: 0.68rem !important; }
+.slidev-layout.sc-cheat thead { display: none; }
+
+/* The theme's `center-statement` inherits the 1.25rem body scale for its
+   paragraph, which is the right size for prose and much too small for a line
+   that is the whole slide. Sized here rather than in the theme, because this
+   is a preference of this deck rather than a fix to a shared layout. */
+.slidev-layout.center-statement p {
+  font-size: 2.7rem !important;
+  line-height: 1.25 !important;
+  color: var(--sc-ink);
+}
+.slidev-layout.center-statement .sc-coda p {
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  color: var(--color-dark-gray);
+}
+.slidev-layout.center-statement .sc-coda code {
+  font-size: 0.85rem !important;
+}

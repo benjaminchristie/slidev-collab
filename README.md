@@ -17,6 +17,7 @@ them.
 ```
 examples/talk/              example deck using the formal theme
 examples/weekly-update/     example deck using the meeting theme
+examples/showcase/          everything Slidev can do, in one deck
 common/collab/              formal-talk theme
 common/weekly_collab/       weekly-update theme + starter template
 compose.slidev.yml          dev server + batch renderer
@@ -100,6 +101,29 @@ Plus `Legend` for the series in a figure and `Runs` for a sweep table.
 See `common/weekly_collab/README.md` and `common/collab/README.md` for the full
 reference. Each theme's example deck under `examples/` uses every layout and
 component it ships.
+
+## The showcase deck
+
+```bash
+./present showcase
+```
+
+`examples/showcase` is a third example, and a different kind of thing: thirty-four
+slides of what Slidev can do when a slide is allowed to be a web page. Code that
+morphs between versions and code you can edit and run, charts you can hover,
+a results table you can re-sort from the stage, Mermaid, KaTeX, annotations you
+drag into place, a two-link arm solving inverse kinematics, and three optimisers
+arguing about a loss surface. Every slide names the feature it is demonstrating
+in a badge at the top right.
+
+Nothing was installed to build it — it runs on the same pinned Slidev in the
+same container as the other two. It also shows how a deck extends `common/collab`
+*locally*: ten components, four layouts and a stylesheet, all living next to its
+own `slides.md` and none of them touching the shared theme.
+
+Unlike the other two examples this one is not a template to copy wholesale.
+Take the slide you want and the component under it. See
+`examples/showcase/README.md`.
 
 ## Importing from Google Slides
 
